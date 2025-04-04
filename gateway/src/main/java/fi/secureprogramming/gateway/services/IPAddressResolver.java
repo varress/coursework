@@ -11,10 +11,10 @@ import java.util.Optional;
 
 @Component
 public class IPAddressResolver implements KeyResolver {
-    
+
     @Override
     public Mono<String> resolve(ServerWebExchange exchange) {
-        return Optional.ofNullable(exchange.getRequest().getRemoteAddress())
+        return Optional.of(exchange.getRequest().getRemoteAddress())
                 .map(InetSocketAddress::getAddress)
                 .map(InetAddress::getHostAddress)
                 .map(Mono::just)
