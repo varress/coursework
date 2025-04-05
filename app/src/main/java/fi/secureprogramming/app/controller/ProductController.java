@@ -12,6 +12,8 @@ import java.util.List;
 @RequestMapping("/products")
 class ProductController {
 
+    //TODO: Error handling
+
     @Autowired
     private ProductService service;
 
@@ -21,7 +23,8 @@ class ProductController {
     }
 
     @PostMapping
-    public Product addProduct(@RequestBody ProductDTO product) {
-        return service.addProduct(product.toEntity());
+    public ProductDTO addProduct(@RequestBody ProductDTO product) {
+        Product newProduct = service.addProduct(product.toEntity());
+        return ProductDTO.fromEntity(newProduct);
     }
 }
