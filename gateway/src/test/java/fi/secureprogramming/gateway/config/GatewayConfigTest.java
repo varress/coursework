@@ -2,6 +2,7 @@ package fi.secureprogramming.gateway.config;
 
 import fi.secureprogramming.gateway.dto.ProductDTO;
 import fi.secureprogramming.gateway.services.IPAddressResolver;
+import fi.secureprogramming.gateway.services.MobileClientResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,8 +31,12 @@ public class GatewayConfigTest {
     @MockitoBean
     private IPAddressResolver ipAddressResolver;
 
+    @MockitoBean
+    private MobileClientResolver mobileClientResolver;
+
     @Test
-    void testRateLimitingExceeded() {
+    void testRateLimitingExceededWithIpAddress() {
+
         RateLimiter.Response response = new RateLimiter.Response(false, getRateLimitResponseHeaders());
         when(redisRateLimiter.isAllowed(any(), any())).thenReturn(Mono.just(response));
         when(ipAddressResolver.resolve(any())).thenReturn(Mono.just("1.2.3.4"));
@@ -39,6 +44,19 @@ public class GatewayConfigTest {
         webTestClient.post()
                 .uri("/products")
                 .bodyValue(new ProductDTO())
+                .exchange()
+                .expectStatus().isEqualTo(429);
+    }
+
+    @Test
+    void testRateLimitingExceededWithMobileClient() {
+
+        RateLimiter.Response response = new RateLimiter.Response(false, getRateLimitResponseHeaders());
+        when(redisRateLimiter.isAllowed(any(), any())).thenReturn(Mono.just(response));
+        when(mobileClientResolver.resolve(any())).thenReturn(Mono.just("1132435453"));
+
+        webTestClient.get()
+                .uri("/products")
                 .exchange()
                 .expectStatus().isEqualTo(429);
     }
@@ -51,4 +69,5 @@ public class GatewayConfigTest {
                 "REQUESTED_TOKENS_HEADER", "1"
         );
     }
+
 }
