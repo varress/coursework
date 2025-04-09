@@ -1,5 +1,6 @@
 package fi.secureprogramming.gateway.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
@@ -8,6 +9,7 @@ public class Device {
     @Id
     private String uuid;
 
+    @Column(nullable = false)
     private String secret;
 
     private boolean active;
