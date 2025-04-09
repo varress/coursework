@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.sasl.AuthenticationException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -42,9 +43,10 @@ public class DeviceServiceTest {
     public void testVerifyDeviceOnValidSignature() throws Exception {
         String uuid = "device-123";
         String secret = "c2VjcmV0";
-        String timestamp = "2023-01-01T12:00:00Z";
+        String timestamp = "1617812345";
         String data = uuid + ":" + timestamp;
-        String signature = getSecret(secret, data);
+
+        String signature = createSignature(secret, data);
 
         Device device = new Device(uuid, secret, true);
 
@@ -56,15 +58,16 @@ public class DeviceServiceTest {
         assertNotNull(result);
         assertEquals(uuid, result.getUuid());
         verify(deviceRepository, times(1)).findById(uuid);
+
     }
 
     @Test
     public void testVerifyDeviceOnValidSignatureButUnactivatedDevice() throws AuthenticationException, NoSuchAlgorithmException, InvalidKeyException {
         String uuid = "device-123";
         String secret = "c2VjcmV0";
-        String timestamp = "2023-01-01T12:00:00Z";
+        String timestamp = "1617812345";
         String data = uuid + ":" + timestamp;
-        String signature = getSecret(secret, data);
+        String signature = createSignature(secret, data);
 
         Device device = new Device(uuid, secret, false);
 
@@ -79,7 +82,7 @@ public class DeviceServiceTest {
     public void testVerifyDeviceOnInvalidSignature() throws Exception {
         String uuid = "device-123";
         String secret = "c2VjcmV0";
-        String timestamp = "2023-01-01T12:00:00Z";
+        String timestamp = "1617812345";
         String signature = "invalid-signature";
 
         Device device = new Device(uuid, secret, true);
@@ -99,7 +102,7 @@ public class DeviceServiceTest {
     public void testVerifyDeviceOnDeviceNotFound() {
         String uuid = "device-123";
         String signature = "some-signature";
-        String timestamp = "2023-01-01T12:00:00Z";
+        String timestamp = "1617812345";
 
         when(deviceRepository.findById(uuid)).thenReturn(Optional.empty());
 
@@ -123,10 +126,19 @@ public class DeviceServiceTest {
         assertEquals("Device already registered", e.getMessage());
     }
 
-    private String getSecret(String secret, String data) throws NoSuchAlgorithmException, InvalidKeyException {
+    private String createSignature(String secret, String data) throws NoSuchAlgorithmException, InvalidKeyException {
         Mac mac = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secretKeySpec = new SecretKeySpec(Base64.getDecoder().decode(secret), "HmacSHA256");
-        mac.init(secretKeySpec);
-        return Base64.getEncoder().encodeToString(mac.doFinal(data.getBytes()));
+        SecretKeySpec key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
+        mac.init(key);
+        byte[] hmac = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+        return bytesToHex(hmac);
+    }
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            hexString.append(Integer.toHexString(0xFF & bytes[i]));
+        }
+        return hexString.toString();
     }
 }

@@ -12,6 +12,7 @@ import javax.security.sasl.AuthenticationException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 public class DeviceService {
@@ -21,6 +22,8 @@ public class DeviceService {
 
     @Autowired
     private EncryptionService encryptionService;
+
+    Logger logger = Logger.getLogger(DeviceService.class.getName());
 
     public void register(String uuid, String secret) throws Exception {
         deviceRepository.findById(uuid).ifPresent(device -> {
@@ -70,14 +73,23 @@ public class DeviceService {
 
     private String hmacSha256(String signature, String data) {
         try {
-            SecretKeySpec key = new SecretKeySpec(Base64.getDecoder().decode(signature), "HmacSHA256");
+            SecretKeySpec key = new SecretKeySpec(signature.getBytes(), "HmacSHA256");
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(key);
             byte[] hmac = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(hmac);
+            return bytesToHex(hmac);
+            //return Base64.getEncoder().encodeToString(hmac);
         } catch (Exception e) {
             throw new RuntimeException("HMAC failed", e);
         }
+    }
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            hexString.append(Integer.toHexString(0xFF & bytes[i]));
+        }
+        return hexString.toString();
     }
 
 }
