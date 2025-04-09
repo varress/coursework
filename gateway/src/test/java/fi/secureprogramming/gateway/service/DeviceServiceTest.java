@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.context.ActiveProfiles;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -40,7 +39,7 @@ public class DeviceServiceTest {
     }
 
     @Test
-    public void testVerifyDeviceOnValidSignature() throws AuthenticationException, NoSuchAlgorithmException, InvalidKeyException {
+    public void testVerifyDeviceOnValidSignature() throws Exception {
         String uuid = "device-123";
         String secret = "c2VjcmV0";
         String timestamp = "2023-01-01T12:00:00Z";
@@ -50,6 +49,7 @@ public class DeviceServiceTest {
         Device device = new Device(uuid, secret, true);
 
         when(deviceRepository.findById(uuid)).thenReturn(Optional.of(device));
+        when(encryptionService.decrypt(anyString())).thenReturn(secret);
 
         Device result = deviceService.verifyDevice(uuid, signature, timestamp);
 
@@ -76,7 +76,7 @@ public class DeviceServiceTest {
     }
 
     @Test
-    public void testVerifyDeviceOnInvalidSignature() {
+    public void testVerifyDeviceOnInvalidSignature() throws Exception {
         String uuid = "device-123";
         String secret = "c2VjcmV0";
         String timestamp = "2023-01-01T12:00:00Z";
@@ -85,6 +85,7 @@ public class DeviceServiceTest {
         Device device = new Device(uuid, secret, true);
 
         when(deviceRepository.findById(uuid)).thenReturn(Optional.of(device));
+        when(encryptionService.decrypt(anyString())).thenReturn(secret);
 
         AuthenticationException exception = assertThrows(AuthenticationException.class, () -> {
             deviceService.verifyDevice(uuid, signature, timestamp);

@@ -50,15 +50,16 @@ public class DeviceService {
         return deviceRepository.findAll();
     }
 
-    public Device verifyDevice(String uuid, String signature, String timestamp) throws AuthenticationException {
+    public Device verifyDevice(String uuid, String signature, String timestamp) throws Exception {
         Device device = deviceRepository.findById(uuid).orElseThrow(() -> new AuthenticationException("Device not found"));
 
         if (!device.isActive()) {
             throw new AuthenticationException("Device is not active");
         }
 
+        String decryptedSecret = encryptionService.decrypt(device.getSecret());
         String data = uuid + ":" + timestamp;
-        String expectedSig = hmacSha256(device.getSecret(), data);
+        String expectedSig = hmacSha256(decryptedSecret, data);
 
         if (!expectedSig.equals(signature)) {
             throw new AuthenticationException("Invalid signature");

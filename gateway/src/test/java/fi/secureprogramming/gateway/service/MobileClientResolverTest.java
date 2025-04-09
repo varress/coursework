@@ -120,7 +120,7 @@ public class MobileClientResolverTest {
     }
 
     @Test
-    public void testInactiveDevice() throws AuthenticationException {
+    public void testInactiveDevice() throws Exception {
         HttpHeaders headers = mock(HttpHeaders.class);
         ServerHttpRequest request = mock(ServerHttpRequest.class);
         ServerHttpResponse response = mock(ServerHttpResponse.class);
@@ -148,7 +148,7 @@ public class MobileClientResolverTest {
     }
 
     @Test
-    public void testInvalidSignature() throws AuthenticationException {
+    public void testInvalidSignature() throws Exception {
         HttpHeaders headers = mock(HttpHeaders.class);
         ServerHttpRequest request = mock(ServerHttpRequest.class);
         ServerHttpResponse response = mock(ServerHttpResponse.class);
