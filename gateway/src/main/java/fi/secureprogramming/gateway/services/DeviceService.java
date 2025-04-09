@@ -30,7 +30,8 @@ public class DeviceService {
             throw new IllegalArgumentException("Device already registered");
         });
 
-        String encryptedSecret = encryptionService.encrypt(secret);
+        byte[] decodedSecret = Base64.getDecoder().decode(secret);
+        String encryptedSecret = encryptionService.encrypt(new String(decodedSecret));
         Device device = new Device(uuid, encryptedSecret, true);
         deviceRepository.save(device);
     }
@@ -77,19 +78,10 @@ public class DeviceService {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(key);
             byte[] hmac = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            return bytesToHex(hmac);
-            //return Base64.getEncoder().encodeToString(hmac);
+            return Base64.getEncoder().encodeToString(hmac);
         } catch (Exception e) {
             throw new RuntimeException("HMAC failed", e);
         }
-    }
-
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            hexString.append(Integer.toHexString(0xFF & bytes[i]));
-        }
-        return hexString.toString();
     }
 
 }

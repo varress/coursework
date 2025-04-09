@@ -58,7 +58,6 @@ public class DeviceServiceTest {
         assertNotNull(result);
         assertEquals(uuid, result.getUuid());
         verify(deviceRepository, times(1)).findById(uuid);
-
     }
 
     @Test
@@ -131,14 +130,6 @@ public class DeviceServiceTest {
         SecretKeySpec key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
         mac.init(key);
         byte[] hmac = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        return bytesToHex(hmac);
-    }
-
-    private String bytesToHex(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            hexString.append(Integer.toHexString(0xFF & bytes[i]));
-        }
-        return hexString.toString();
+        return Base64.getEncoder().encodeToString(hmac);
     }
 }
