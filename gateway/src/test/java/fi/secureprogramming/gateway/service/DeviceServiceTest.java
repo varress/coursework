@@ -3,11 +3,13 @@ package fi.secureprogramming.gateway.service;
 import fi.secureprogramming.gateway.model.Device;
 import fi.secureprogramming.gateway.repository.DeviceRepository;
 import fi.secureprogramming.gateway.services.DeviceService;
+import fi.secureprogramming.gateway.services.EncryptionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -16,6 +18,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -24,18 +27,22 @@ public class DeviceServiceTest {
     @Mock
     private DeviceRepository deviceRepository;
 
+    @Mock
+    private EncryptionService encryptionService;
+
     @InjectMocks
     private DeviceService deviceService;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
+        when(encryptionService.encrypt(anyString())).thenReturn("encrypted-secret");
     }
 
     @Test
     public void testVerifyDeviceOnValidSignature() throws AuthenticationException, NoSuchAlgorithmException, InvalidKeyException {
         String uuid = "device-123";
-        String secret = "c2VjcmV0"; // Base64 encoded "secret"
+        String secret = "c2VjcmV0";
         String timestamp = "2023-01-01T12:00:00Z";
         String data = uuid + ":" + timestamp;
         String signature = getSecret(secret, data);
@@ -54,7 +61,7 @@ public class DeviceServiceTest {
     @Test
     public void testVerifyDeviceOnValidSignatureButUnactivatedDevice() throws AuthenticationException, NoSuchAlgorithmException, InvalidKeyException {
         String uuid = "device-123";
-        String secret = "c2VjcmV0"; // Base64 encoded "secret"
+        String secret = "c2VjcmV0";
         String timestamp = "2023-01-01T12:00:00Z";
         String data = uuid + ":" + timestamp;
         String signature = getSecret(secret, data);
@@ -71,7 +78,7 @@ public class DeviceServiceTest {
     @Test
     public void testVerifyDeviceOnInvalidSignature() {
         String uuid = "device-123";
-        String secret = "c2VjcmV0"; // Base64 encoded "secret"
+        String secret = "c2VjcmV0";
         String timestamp = "2023-01-01T12:00:00Z";
         String signature = "invalid-signature";
 
@@ -101,6 +108,18 @@ public class DeviceServiceTest {
 
         assertEquals("Device not found", exception.getMessage());
         verify(deviceRepository, times(1)).findById(uuid);
+    }
+
+    @Test
+    public void testRegisteringWithUUIDThatAlreadyExists() {
+        Device device = new Device("device-123", "c2VjcmV0", true);
+        when(deviceRepository.findById(device.getUuid())).thenReturn(Optional.of(device));
+
+        Exception e = assertThrows(Exception.class, () -> {
+            deviceService.register(device.getUuid(), device.getSecret());
+        });
+
+        assertEquals("Device already registered", e.getMessage());
     }
 
     private String getSecret(String secret, String data) throws NoSuchAlgorithmException, InvalidKeyException {

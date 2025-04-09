@@ -3,6 +3,7 @@ package fi.secureprogramming.gateway.services;
 import fi.secureprogramming.gateway.model.Device;
 import fi.secureprogramming.gateway.repository.DeviceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
@@ -18,23 +19,28 @@ public class DeviceService {
     @Autowired
     private DeviceRepository deviceRepository;
 
-    public boolean existsById(String uuid) {
-        return deviceRepository.existsById(uuid);
-    }
+    @Autowired
+    private EncryptionService encryptionService;
 
-    public void save(Device device) {
+    public void register(String uuid, String secret) throws Exception {
+        deviceRepository.findById(uuid).ifPresent(device -> {
+            throw new IllegalArgumentException("Device already registered");
+        });
+
+        String encryptedSecret = encryptionService.encrypt(secret);
+        Device device = new Device(uuid, encryptedSecret, true);
         deviceRepository.save(device);
     }
 
     public void inactivateDevice(String uuid) {
-        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new RuntimeException("Device not found"));
+        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new NotFoundException("Device not found"));
         device.setActive(false);
 
         deviceRepository.save(device);
     }
 
     public void activateDevice(String uuid) {
-        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new RuntimeException("Device not found"));
+        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new NotFoundException("Device not found"));
         device.setActive(true);
 
         deviceRepository.save(device);
