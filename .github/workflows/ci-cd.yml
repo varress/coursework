@@ -28,7 +28,8 @@ jobs:
         run: chmod +x ./gradlew          
 
       - name: Build Project
-        run: ./gradlew build -x test
+      #TODO: FIX ME
+        run: ./gradlew build -x test 
         env:
             DB_HOST: ${{ secrets.DB_HOST }}
             DB_PORT: ${{ secrets.DB_PORT }}

@@ -36,8 +36,7 @@ public class GatewayConfigTest {
 
     @Test
     void testRateLimitingExceededWithIpAddress() {
-        /*
-                RateLimiter.Response response = new RateLimiter.Response(false, getRateLimitResponseHeaders());
+        RateLimiter.Response response = new RateLimiter.Response(false, getRateLimitResponseHeaders());
         when(redisRateLimiter.isAllowed(any(), any())).thenReturn(Mono.just(response));
         when(ipAddressResolver.resolve(any())).thenReturn(Mono.just("1.2.3.4"));
 
@@ -46,13 +45,10 @@ public class GatewayConfigTest {
                 .bodyValue(new ProductDTO())
                 .exchange()
                 .expectStatus().isEqualTo(429);
-                */
     }
 
     @Test
     void testRateLimitingExceededWithMobileClient() {
-        /*
-
         RateLimiter.Response response = new RateLimiter.Response(false, getRateLimitResponseHeaders());
         when(redisRateLimiter.isAllowed(any(), any())).thenReturn(Mono.just(response));
         when(mobileClientResolver.resolve(any())).thenReturn(Mono.just("1132435453"));
@@ -61,7 +57,7 @@ public class GatewayConfigTest {
                 .uri("/products")
                 .exchange()
                 .expectStatus().isEqualTo(429);
-            */
+
     }
 
     private Map<String, String> getRateLimitResponseHeaders() {
