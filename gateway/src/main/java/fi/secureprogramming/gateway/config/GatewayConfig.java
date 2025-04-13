@@ -25,16 +25,22 @@ public class GatewayConfig {
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("create-product", r -> r.path("/products")
+                .route("create-product", createProductRoute -> createProductRoute
+                        .path("/products")
                         .and().method("POST")
                         .and().readBody(ProductDTO.class, productDTO -> true)
-                        .filters(f -> f.requestRateLimiter(r2 -> r2.setRateLimiter(redisRateLimiter)
-                                .setKeyResolver(ipAddressResolver)))
+                        .filters(createProductFilters -> createProductFilters
+                                .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
+                                        .setRateLimiter(redisRateLimiter)
+                                        .setKeyResolver(ipAddressResolver)))
                         .uri("http://app:8080"))
-                .route("get-products", r -> r.path("/products")
+                .route("get-products", getProductsRoute -> getProductsRoute
+                        .path("/products")
                         .and().method("GET")
-                        .filters(f -> f.requestRateLimiter(r2 -> r2.setRateLimiter(redisRateLimiter)
-                                .setKeyResolver(mobileClientResolver)))
+                        .filters(getProductsFilters -> getProductsFilters
+                                .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
+                                        .setRateLimiter(redisRateLimiter)
+                                        .setKeyResolver(mobileClientResolver)))
                         .uri("http://app:8080"))
                 .build();
     }
