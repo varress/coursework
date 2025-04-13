@@ -1,4 +1,4 @@
-package fi.secureprogramming.gateway.model;
+package fi.secureprogramming.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 public class MobileClientResolver implements KeyResolver {
 
     @Autowired
-    private DeviceService deviceService;
+    private DeviceVerificationService deviceVerificationService;
 
     @Override
     public Mono<String> resolve(ServerWebExchange exchange) {
@@ -29,7 +29,7 @@ public class MobileClientResolver implements KeyResolver {
         }
 
         try {
-            deviceService.verifyDevice(uuid, signature, timestamp);
+            deviceVerificationService.verifyDevice(uuid, signature, timestamp);
             return Mono.just(uuid);
         } catch (Exception e) {
             return unauthorized(exchange, e.getMessage())

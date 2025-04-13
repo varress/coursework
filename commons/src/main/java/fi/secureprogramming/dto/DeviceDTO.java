@@ -1,6 +1,6 @@
-package fi.secureprogramming.gateway.dto;
+package fi.secureprogramming.dto;
 
-import fi.secureprogramming.gateway.model.Device;
+import fi.secureprogramming.model.Device;
 import lombok.Data;
 
 @Data
@@ -29,5 +29,13 @@ public class DeviceDTO {
 
     public Device toEntity() {
         return new Device(this.uuid, this.secret, true);
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public String getSecret() {
+        return secret;
     }
 }

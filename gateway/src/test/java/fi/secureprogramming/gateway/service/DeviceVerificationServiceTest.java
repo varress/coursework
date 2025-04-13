@@ -1,12 +1,11 @@
 package fi.secureprogramming.gateway.service;
 
-import fi.secureprogramming.gateway.model.Device;
-import fi.secureprogramming.gateway.repository.DeviceRepository;
-import fi.secureprogramming.gateway.services.DeviceService;
-import fi.secureprogramming.gateway.services.EncryptionService;
+import fi.secureprogramming.gateway.services.DeviceVerificationService;
+import fi.secureprogramming.model.Device;
+import fi.secureprogramming.repository.DeviceRepository;
+import fi.secureprogramming.service.EncryptionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -22,38 +21,39 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class DeviceServiceTest {
+public class DeviceVerificationServiceTest {
 
     @Mock
     private DeviceRepository deviceRepository;
 
-    @Mock
     private EncryptionService encryptionService;
 
-    @InjectMocks
-    private DeviceService deviceService;
+    private DeviceVerificationService deviceVerificationService;
 
     @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        when(encryptionService.encrypt(anyString())).thenReturn("encrypted-secret");
+
+        String mockEncryptionKey = Base64.getEncoder().encodeToString("mock-key-16bytes".getBytes(StandardCharsets.UTF_8));
+        deviceVerificationService = new DeviceVerificationService(deviceRepository, mockEncryptionKey);
+
+        encryptionService = new EncryptionService(mockEncryptionKey);
     }
 
     @Test
     public void testVerifyDeviceOnValidSignature() throws Exception {
+        String encryptedSecret = encryptionService.encrypt("valid-secret-16");
+
         String uuid = "device-123";
-        String secret = "c2VjcmV0";
         String timestamp = "1617812345";
         String data = uuid + ":" + timestamp;
 
-        String signature = createSignature(secret, data);
+        String signature = createSignature("valid-secret-16", data);
 
-        Device device = new Device(uuid, secret, true);
-
+        Device device = new Device(uuid, encryptedSecret, true);
         when(deviceRepository.findById(uuid)).thenReturn(Optional.of(device));
-        when(encryptionService.decrypt(anyString())).thenReturn(secret);
 
-        Device result = deviceService.verifyDevice(uuid, signature, timestamp);
+        Device result = deviceVerificationService.verifyDevice(uuid, signature, timestamp);
 
         assertNotNull(result);
         assertEquals(uuid, result.getUuid());
@@ -61,36 +61,40 @@ public class DeviceServiceTest {
     }
 
     @Test
-    public void testVerifyDeviceOnValidSignatureButUnactivatedDevice() throws AuthenticationException, NoSuchAlgorithmException, InvalidKeyException {
+    public void testVerifyDeviceOnValidSignatureButUnactivatedDevice() throws Exception {
+        String encryptedSecret = encryptionService.encrypt("valid-secret-16");
+
         String uuid = "device-123";
-        String secret = "c2VjcmV0";
         String timestamp = "1617812345";
         String data = uuid + ":" + timestamp;
-        String signature = createSignature(secret, data);
 
-        Device device = new Device(uuid, secret, false);
+        String signature = createSignature("valid-secret-16", data);
+
+        Device device = new Device(uuid, encryptedSecret, false);
 
         when(deviceRepository.findById(uuid)).thenReturn(Optional.of(device));
 
         AuthenticationException exception = assertThrows(AuthenticationException.class, () -> {
-            deviceService.verifyDevice(uuid, signature, timestamp);
+            deviceVerificationService.verifyDevice(uuid, signature, timestamp);
         });
     }
 
     @Test
     public void testVerifyDeviceOnInvalidSignature() throws Exception {
-        String uuid = "device-123";
-        String secret = "c2VjcmV0";
-        String timestamp = "1617812345";
-        String signature = "invalid-signature";
+        String encryptedSecret = encryptionService.encrypt("valid-secret-16");
 
-        Device device = new Device(uuid, secret, true);
+        String uuid = "device-123";
+        String timestamp = "1617812345";
+        String data = uuid + ":" + timestamp;
+
+        String signature = createSignature("valid-secret-19", data);
+
+        Device device = new Device(uuid, encryptedSecret, true);
 
         when(deviceRepository.findById(uuid)).thenReturn(Optional.of(device));
-        when(encryptionService.decrypt(anyString())).thenReturn(secret);
 
         AuthenticationException exception = assertThrows(AuthenticationException.class, () -> {
-            deviceService.verifyDevice(uuid, signature, timestamp);
+            deviceVerificationService.verifyDevice(uuid, signature, timestamp);
         });
 
         assertEquals("Invalid signature", exception.getMessage());
@@ -106,23 +110,11 @@ public class DeviceServiceTest {
         when(deviceRepository.findById(uuid)).thenReturn(Optional.empty());
 
         AuthenticationException exception = assertThrows(AuthenticationException.class, () -> {
-            deviceService.verifyDevice(uuid, signature, timestamp);
+            deviceVerificationService.verifyDevice(uuid, signature, timestamp);
         });
 
         assertEquals("Device not found", exception.getMessage());
         verify(deviceRepository, times(1)).findById(uuid);
-    }
-
-    @Test
-    public void testRegisteringWithUUIDThatAlreadyExists() {
-        Device device = new Device("device-123", "c2VjcmV0", true);
-        when(deviceRepository.findById(device.getUuid())).thenReturn(Optional.of(device));
-
-        Exception e = assertThrows(Exception.class, () -> {
-            deviceService.register(device.getUuid(), device.getSecret());
-        });
-
-        assertEquals("Device already registered", e.getMessage());
     }
 
     private String createSignature(String secret, String data) throws NoSuchAlgorithmException, InvalidKeyException {

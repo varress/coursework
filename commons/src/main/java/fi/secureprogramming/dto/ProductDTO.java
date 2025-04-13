@@ -1,4 +1,4 @@
-package fi.secureprogramming.gateway.dto;
+package fi.secureprogramming.dto;
 
 import lombok.Data;
 

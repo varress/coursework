@@ -1,9 +1,10 @@
-package fi.secureprogramming.gateway.services;
+package fi.secureprogramming.app.service;
 
-import fi.secureprogramming.gateway.model.Device;
-import fi.secureprogramming.gateway.repository.DeviceRepository;
+import fi.secureprogramming.model.Device;
+import fi.secureprogramming.repository.DeviceRepository;
+import fi.secureprogramming.service.EncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.gateway.support.NotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
@@ -12,18 +13,18 @@ import javax.security.sasl.AuthenticationException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Service
 public class DeviceService {
 
-    @Autowired
-    private DeviceRepository deviceRepository;
+    private final DeviceRepository deviceRepository;
+    private final EncryptionService encryptionService;
 
     @Autowired
-    private EncryptionService encryptionService;
-
-    Logger logger = Logger.getLogger(DeviceService.class.getName());
+    public DeviceService(DeviceRepository deviceRepository, @Value("${encryption.key}") String encryptionKey) {
+        this.deviceRepository = deviceRepository;
+        this.encryptionService = new EncryptionService(encryptionKey);
+    }
 
     public void register(String uuid, String secret) throws Exception {
         deviceRepository.findById(uuid).ifPresent(device -> {
@@ -36,15 +37,15 @@ public class DeviceService {
         deviceRepository.save(device);
     }
 
-    public void inactivateDevice(String uuid) {
-        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new NotFoundException("Device not found"));
+    public void inactivateDevice(String uuid) throws Exception {
+        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new Exception("Device not found"));
         device.setActive(false);
 
         deviceRepository.save(device);
     }
 
-    public void activateDevice(String uuid) {
-        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new NotFoundException("Device not found"));
+    public void activateDevice(String uuid) throws Exception {
+        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new Exception("Device not found"));
         device.setActive(true);
 
         deviceRepository.save(device);

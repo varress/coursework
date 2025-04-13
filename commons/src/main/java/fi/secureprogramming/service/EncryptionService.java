@@ -1,18 +1,14 @@
-package fi.secureprogramming.gateway.services;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+package fi.secureprogramming.service;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
-@Component
 public class EncryptionService {
     private final String algorithm = "AES";
     private final byte[] encryptionKeyBytes;
 
-    public EncryptionService(@Value("${encryption.key}") String encryptionKey) {
+    public EncryptionService(String encryptionKey) {
         this.encryptionKeyBytes = Base64.getDecoder().decode(encryptionKey);
     }
 

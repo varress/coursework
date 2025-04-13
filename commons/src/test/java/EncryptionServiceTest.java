@@ -1,10 +1,9 @@
-package fi.secureprogramming.gateway.service;
-
-import fi.secureprogramming.gateway.services.EncryptionService;
+import fi.secureprogramming.service.EncryptionService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class EncryptionServiceTest {
 

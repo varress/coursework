@@ -1,6 +1,6 @@
 package fi.secureprogramming.gateway.service;
 
-import fi.secureprogramming.gateway.services.DeviceService;
+import fi.secureprogramming.gateway.services.DeviceVerificationService;
 import fi.secureprogramming.gateway.services.MobileClientResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 public class MobileClientResolverTest {
 
     @Mock
-    private DeviceService deviceService;
+    private DeviceVerificationService deviceVerificationService;
 
     @InjectMocks
     private MobileClientResolver mobileClientResolver;
@@ -137,7 +137,7 @@ public class MobileClientResolverTest {
         when(exchange.getResponse()).thenReturn(response);
         when(response.bufferFactory()).thenReturn(dataBufferFactory);
         when(response.writeWith(any())).thenReturn(Mono.empty());
-        when(deviceService.verifyDevice("something", "something", "1744224120"))
+        when(deviceVerificationService.verifyDevice("something", "something", "1744224120"))
                 .thenThrow(new AuthenticationException("Device is not active"));
 
         Mono<String> result = mobileClientResolver.resolve(exchange);
@@ -165,7 +165,7 @@ public class MobileClientResolverTest {
         when(exchange.getResponse()).thenReturn(response);
         when(response.bufferFactory()).thenReturn(dataBufferFactory);
         when(response.writeWith(any())).thenReturn(Mono.empty());
-        when(deviceService.verifyDevice("something", "something", "1744224120"))
+        when(deviceVerificationService.verifyDevice("something", "something", "1744224120"))
                 .thenThrow(new AuthenticationException("Invalid signature"));
 
         Mono<String> result = mobileClientResolver.resolve(exchange);

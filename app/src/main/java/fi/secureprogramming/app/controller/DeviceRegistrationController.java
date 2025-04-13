@@ -1,7 +1,7 @@
-package fi.secureprogramming.gateway.controller;
+package fi.secureprogramming.app.controller;
 
-import fi.secureprogramming.gateway.dto.DeviceDTO;
-import fi.secureprogramming.gateway.services.DeviceService;
+import fi.secureprogramming.app.service.DeviceService;
+import fi.secureprogramming.dto.DeviceDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class DeviceRegistrationController {
 
     private Logger logger = LoggerFactory.getLogger(DeviceRegistrationController.class);
 
-    //TODO error handling
+    //TODO error handling.. activate inactive - call onnly from logic?
 
     @PostMapping("/register")
     public ResponseEntity<Void> registerDevice(@RequestBody DeviceDTO device) {
@@ -43,16 +43,22 @@ public class DeviceRegistrationController {
 
     @PostMapping("/inactivate")
     public ResponseEntity<Void> unregisterDevice(@RequestBody DeviceDTO device) {
-        deviceService.inactivateDevice(device.getUuid());
-
-        return ResponseEntity.ok().build();
+        try {
+            deviceService.inactivateDevice(device.getUuid());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PostMapping("/activate")
     public ResponseEntity<Void> activateDevice(@RequestBody DeviceDTO device) {
-        deviceService.activateDevice(device.getUuid());
-
-        return ResponseEntity.ok().build();
+        try {
+            deviceService.activateDevice(device.getUuid());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @GetMapping

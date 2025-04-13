@@ -1,6 +1,6 @@
 package fi.secureprogramming.gateway.config;
 
-import fi.secureprogramming.gateway.dto.ProductDTO;
+import fi.secureprogramming.dto.ProductDTO;
 import fi.secureprogramming.gateway.services.IPAddressResolver;
 import fi.secureprogramming.gateway.services.MobileClientResolver;
 import org.junit.jupiter.api.Test;
