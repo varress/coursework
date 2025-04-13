@@ -40,6 +40,38 @@ public class GatewayConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(mobileClientResolver)))
                         .uri("http://app:8080"))
+                .route("register", registerDeviceRoute -> registerDeviceRoute
+                        .path("/device/register")
+                        .and().method("POST")
+                        .filters(getProductsFilters -> getProductsFilters
+                                .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
+                                        .setRateLimiter(redisRateLimiter)
+                                        .setKeyResolver(ipAddressResolver)))
+                        .uri("http://app:8080"))
+                .route("inactivate", inactivateDeviceRoute -> inactivateDeviceRoute
+                        .path("/device/inactivate")
+                        .and().method("POST")
+                        .filters(inactivateDeviceFilters -> inactivateDeviceFilters
+                                .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
+                                        .setRateLimiter(redisRateLimiter)
+                                        .setKeyResolver(ipAddressResolver)))
+                        .uri("http://app:8080"))
+                .route("activate", activateDeviceRoute -> activateDeviceRoute
+                        .path("/device/activate")
+                        .and().method("POST")
+                        .filters(activateDeviceFilters -> activateDeviceFilters
+                                .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
+                                        .setRateLimiter(redisRateLimiter)
+                                        .setKeyResolver(ipAddressResolver)))
+                        .uri("http://app:8080"))
+                .route("get-devices", getDevicesRoute -> getDevicesRoute
+                        .path("/device")
+                        .and().method("GET")
+                        .filters(getDevicesFilters -> getDevicesFilters
+                                .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
+                                        .setRateLimiter(redisRateLimiter)
+                                        .setKeyResolver(ipAddressResolver)))
+                        .uri("http://app:8080"))
                 .build();
     }
 }
