@@ -24,16 +24,18 @@ public class DeviceServiceTest {
     @Mock
     private DeviceRepository deviceRepository;
 
-    @Mock
     private EncryptionService encryptionService;
 
-    @InjectMocks
     private DeviceService deviceService;
 
     @BeforeEach
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
-        when(encryptionService.encrypt(anyString())).thenReturn("encrypted-secret");
+
+        String mockEncryptionKey = Base64.getEncoder().encodeToString("mock-key-16bytes".getBytes(StandardCharsets.UTF_8));
+        deviceService = new DeviceService(deviceRepository, mockEncryptionKey);
+
+        encryptionService = new EncryptionService(mockEncryptionKey);
     }
 
     @Test
@@ -46,13 +48,5 @@ public class DeviceServiceTest {
         });
 
         assertEquals("Device already registered", e.getMessage());
-    }
-
-    private String createSignature(String secret, String data) throws NoSuchAlgorithmException, InvalidKeyException {
-        Mac mac = Mac.getInstance("HmacSHA256");
-        SecretKeySpec key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
-        mac.init(key);
-        byte[] hmac = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(hmac);
     }
 }

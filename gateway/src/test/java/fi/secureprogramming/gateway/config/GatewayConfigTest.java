@@ -1,6 +1,5 @@
 package fi.secureprogramming.gateway.config;
 
-import fi.secureprogramming.dto.ProductDTO;
 import fi.secureprogramming.gateway.services.IPAddressResolver;
 import fi.secureprogramming.gateway.services.MobileClientResolver;
 import org.junit.jupiter.api.Test;
@@ -42,7 +41,7 @@ public class GatewayConfigTest {
 
         webTestClient.post()
                 .uri("/products")
-                .bodyValue(new ProductDTO())
+                .header("Content-Type", "application/json")
                 .exchange()
                 .expectStatus().isEqualTo(429);
     }
