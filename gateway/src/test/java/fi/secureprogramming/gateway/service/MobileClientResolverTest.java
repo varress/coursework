@@ -2,6 +2,7 @@ package fi.secureprogramming.gateway.service;
 
 import fi.secureprogramming.gateway.services.DeviceVerificationService;
 import fi.secureprogramming.gateway.services.MobileClientResolver;
+import fi.secureprogramming.model.Device;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import javax.security.sasl.AuthenticationException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -81,6 +83,59 @@ public class MobileClientResolverTest {
         ServerWebExchange exchange = createMockExchange("something", "something", "1744224120");
         when(deviceVerificationService.verifyDevice("something", "something", "1744224120"))
                 .thenThrow(new AuthenticationException("Invalid signature"));
+
+        Mono<String> result = mobileClientResolver.resolve(exchange);
+
+        assertUnauthorizedResponse(exchange, result);
+    }
+
+    @Test
+    public void testValidHeaders() throws Exception {
+        ServerWebExchange exchange = createMockExchange("valid-uuid", "valid-signature", "1744224120");
+        when(deviceVerificationService.verifyDevice("valid-uuid", "valid-signature", "1744224120"))
+                .thenReturn(new Device("valid-uuid", "valid-secret", true));
+
+        Mono<String> result = mobileClientResolver.resolve(exchange);
+
+        assertTrue(result.blockOptional().isPresent());
+        assertEquals("valid-uuid", result.block());
+        verify(exchange.getResponse(), never()).setStatusCode(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    public void testEmptyHeaders() {
+        ServerWebExchange exchange = createMockExchange("", "", "");
+
+        Mono<String> result = mobileClientResolver.resolve(exchange);
+
+        assertUnauthorizedResponse(exchange, result);
+    }
+
+    @Test
+    public void testNullHeaders() {
+        ServerWebExchange exchange = createMockExchange(null, null, null);
+
+        Mono<String> result = mobileClientResolver.resolve(exchange);
+
+        assertUnauthorizedResponse(exchange, result);
+    }
+
+    @Test
+    public void testInvalidTimestampFormat() throws Exception {
+        ServerWebExchange exchange = createMockExchange("valid-uuid", "valid-signature", "invalid-timestamp");
+        when(deviceVerificationService.verifyDevice("valid-uuid", "valid-signature", "invalid-timestamp"))
+                .thenThrow(new AuthenticationException("Invalid timestamp format"));
+
+        Mono<String> result = mobileClientResolver.resolve(exchange);
+
+        assertUnauthorizedResponse(exchange, result);
+    }
+
+    @Test
+    public void testExceptionDuringVerification() throws Exception {
+        ServerWebExchange exchange = createMockExchange("valid-uuid", "valid-signature", "1744224120");
+        when(deviceVerificationService.verifyDevice("valid-uuid", "valid-signature", "1744224120"))
+                .thenThrow(new RuntimeException("Unexpected error"));
 
         Mono<String> result = mobileClientResolver.resolve(exchange);
 
