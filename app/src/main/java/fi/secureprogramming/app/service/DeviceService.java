@@ -55,34 +55,4 @@ public class DeviceService {
         return deviceRepository.findAll();
     }
 
-    public Device verifyDevice(String uuid, String signature, String timestamp) throws Exception {
-        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new AuthenticationException("Device not found"));
-
-        if (!device.isActive()) {
-            throw new AuthenticationException("Device is not active");
-        }
-
-        String decryptedSecret = encryptionService.decrypt(device.getSecret());
-        String data = uuid + ":" + timestamp;
-        String expectedSig = hmacSha256(decryptedSecret, data);
-
-        if (!expectedSig.equals(signature)) {
-            throw new AuthenticationException("Invalid signature");
-        }
-
-        return device;
-    }
-
-    private String hmacSha256(String signature, String data) {
-        try {
-            SecretKeySpec key = new SecretKeySpec(signature.getBytes(), "HmacSHA256");
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(key);
-            byte[] hmac = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(hmac);
-        } catch (Exception e) {
-            throw new RuntimeException("HMAC failed", e);
-        }
-    }
-
 }
