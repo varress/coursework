@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -30,149 +30,86 @@ public class MobileClientResolverTest {
     @InjectMocks
     private MobileClientResolver mobileClientResolver;
 
+    private DataBufferFactory dataBufferFactory;
+
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+        dataBufferFactory = new DefaultDataBufferFactory();
     }
 
     @Test
     public void testMissingUUIDHeader() {
-        HttpHeaders headers = mock(HttpHeaders.class);
-        ServerHttpRequest request = mock(ServerHttpRequest.class);
-        ServerHttpResponse response = mock(ServerHttpResponse.class);
-        DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-        DataBuffer dataBuffer = dataBufferFactory.wrap("Missing required headers".getBytes());
-
-        ServerWebExchange exchange = mock(ServerWebExchange.class);
-
-        when(headers.getFirst("X-Device-UUID")).thenReturn(null);
-        when(headers.getFirst("X-Signature")).thenReturn("something");
-        when(headers.getFirst("X-Timestamp")).thenReturn("1744224120");
-        when(request.getHeaders()).thenReturn(headers);
-        when(exchange.getRequest()).thenReturn(request);
-        when(exchange.getResponse()).thenReturn(response);
-        when(response.bufferFactory()).thenReturn(dataBufferFactory);
-        when(response.writeWith(any())).thenReturn(Mono.empty());
+        ServerWebExchange exchange = createMockExchange(null, "something", "1744224120");
 
         Mono<String> result = mobileClientResolver.resolve(exchange);
 
-        assertTrue(result.blockOptional().isEmpty());
-        verify(response).setStatusCode(HttpStatus.UNAUTHORIZED);
-        verify(response).writeWith(any());
+        assertUnauthorizedResponse(exchange, result);
     }
 
     @Test
     public void testMissingSignatureHeader() {
-        HttpHeaders headers = mock(HttpHeaders.class);
-        ServerHttpRequest request = mock(ServerHttpRequest.class);
-        ServerHttpResponse response = mock(ServerHttpResponse.class);
-        DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-        DataBuffer dataBuffer = dataBufferFactory.wrap("Missing required headers".getBytes());
-
-        ServerWebExchange exchange = mock(ServerWebExchange.class);
-
-        when(headers.getFirst("X-Device-UUID")).thenReturn("something");
-        when(headers.getFirst("X-Signature")).thenReturn(null);
-        when(headers.getFirst("X-Timestamp")).thenReturn("1744224120");
-        when(request.getHeaders()).thenReturn(headers);
-        when(exchange.getRequest()).thenReturn(request);
-        when(exchange.getResponse()).thenReturn(response);
-        when(response.bufferFactory()).thenReturn(dataBufferFactory);
-        when(response.writeWith(any())).thenReturn(Mono.empty());
-        when(headers.getFirst("X-Timestamp")).thenReturn("1744224120");
-        when(request.getHeaders()).thenReturn(headers);
-        when(exchange.getRequest()).thenReturn(request);
-        when(exchange.getResponse()).thenReturn(response);
-        when(response.bufferFactory()).thenReturn(dataBufferFactory);
-        when(response.writeWith(any())).thenReturn(Mono.empty());
+        ServerWebExchange exchange = createMockExchange("something", null, "1744224120");
 
         Mono<String> result = mobileClientResolver.resolve(exchange);
 
-        assertTrue(result.blockOptional().isEmpty());
-        verify(response).setStatusCode(HttpStatus.UNAUTHORIZED);
-        verify(response).writeWith(any());
+        assertUnauthorizedResponse(exchange, result);
     }
 
     @Test
     public void testMissingTimestampHeader() {
-        HttpHeaders headers = mock(HttpHeaders.class);
-        ServerHttpRequest request = mock(ServerHttpRequest.class);
-        ServerHttpResponse response = mock(ServerHttpResponse.class);
-        DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-        DataBuffer dataBuffer = dataBufferFactory.wrap("Missing required headers".getBytes());
-
-        ServerWebExchange exchange = mock(ServerWebExchange.class);
-
-        when(headers.getFirst("X-Device-UUID")).thenReturn("something");
-        when(headers.getFirst("X-Signature")).thenReturn("something");
-        when(headers.getFirst("X-Timestamp")).thenReturn(null);
-        when(request.getHeaders()).thenReturn(headers);
-        when(exchange.getRequest()).thenReturn(request);
-        when(exchange.getResponse()).thenReturn(response);
-        when(response.bufferFactory()).thenReturn(dataBufferFactory);
-        when(response.writeWith(any())).thenReturn(Mono.empty());
+        ServerWebExchange exchange = createMockExchange("something", "something", null);
 
         Mono<String> result = mobileClientResolver.resolve(exchange);
 
-        assertTrue(result.blockOptional().isEmpty());
-        verify(response).setStatusCode(HttpStatus.UNAUTHORIZED);
-        verify(response).writeWith(any());
+        assertUnauthorizedResponse(exchange, result);
     }
 
     @Test
     public void testInactiveDevice() throws Exception {
-        HttpHeaders headers = mock(HttpHeaders.class);
-        ServerHttpRequest request = mock(ServerHttpRequest.class);
-        ServerHttpResponse response = mock(ServerHttpResponse.class);
-        DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-        DataBuffer dataBuffer = dataBufferFactory.wrap("Missing required headers".getBytes());
-
-        ServerWebExchange exchange = mock(ServerWebExchange.class);
-
-        when(headers.getFirst("X-Device-UUID")).thenReturn("something");
-        when(headers.getFirst("X-Signature")).thenReturn("something");
-        when(headers.getFirst("X-Timestamp")).thenReturn("1744224120");
-        when(request.getHeaders()).thenReturn(headers);
-        when(exchange.getRequest()).thenReturn(request);
-        when(exchange.getResponse()).thenReturn(response);
-        when(response.bufferFactory()).thenReturn(dataBufferFactory);
-        when(response.writeWith(any())).thenReturn(Mono.empty());
+        ServerWebExchange exchange = createMockExchange("something", "something", "1744224120");
         when(deviceVerificationService.verifyDevice("something", "something", "1744224120"))
                 .thenThrow(new AuthenticationException("Device is not active"));
 
         Mono<String> result = mobileClientResolver.resolve(exchange);
 
-        assertTrue(result.blockOptional().isEmpty());
-        verify(response).setStatusCode(HttpStatus.UNAUTHORIZED);
-        verify(response).writeWith(any());
+        assertUnauthorizedResponse(exchange, result);
     }
 
     @Test
     public void testInvalidSignature() throws Exception {
-        HttpHeaders headers = mock(HttpHeaders.class);
-        ServerHttpRequest request = mock(ServerHttpRequest.class);
-        ServerHttpResponse response = mock(ServerHttpResponse.class);
-        DataBufferFactory dataBufferFactory = new DefaultDataBufferFactory();
-        DataBuffer dataBuffer = dataBufferFactory.wrap("Missing required headers".getBytes());
-
-        ServerWebExchange exchange = mock(ServerWebExchange.class);
-
-        when(headers.getFirst("X-Device-UUID")).thenReturn("something");
-        when(headers.getFirst("X-Signature")).thenReturn("something");
-        when(headers.getFirst("X-Timestamp")).thenReturn("1744224120");
-        when(request.getHeaders()).thenReturn(headers);
-        when(exchange.getRequest()).thenReturn(request);
-        when(exchange.getResponse()).thenReturn(response);
-        when(response.bufferFactory()).thenReturn(dataBufferFactory);
-        when(response.writeWith(any())).thenReturn(Mono.empty());
+        ServerWebExchange exchange = createMockExchange("something", "something", "1744224120");
         when(deviceVerificationService.verifyDevice("something", "something", "1744224120"))
                 .thenThrow(new AuthenticationException("Invalid signature"));
 
         Mono<String> result = mobileClientResolver.resolve(exchange);
 
-        assertTrue(result.blockOptional().isEmpty());
-        verify(response).setStatusCode(HttpStatus.UNAUTHORIZED);
-        verify(response).writeWith(any());
+        assertUnauthorizedResponse(exchange, result);
     }
 
+    private ServerWebExchange createMockExchange(String uuid, String signature, String timestamp) {
+        HttpHeaders headers = mock(HttpHeaders.class);
+        ServerHttpRequest request = mock(ServerHttpRequest.class);
+        ServerHttpResponse response = mock(ServerHttpResponse.class);
+        ServerWebExchange exchange = mock(ServerWebExchange.class);
+
+        when(headers.getFirst("X-Device-UUID")).thenReturn(uuid);
+        when(headers.getFirst("X-Signature")).thenReturn(signature);
+        when(headers.getFirst("X-Timestamp")).thenReturn(timestamp);
+        when(request.getHeaders()).thenReturn(headers);
+        when(request.getMethod()).thenReturn(mock(HttpMethod.class));
+        when(request.getURI()).thenReturn(null);
+        when(exchange.getRequest()).thenReturn(request);
+        when(exchange.getResponse()).thenReturn(response);
+        when(response.bufferFactory()).thenReturn(dataBufferFactory);
+        when(response.writeWith(any())).thenReturn(Mono.empty());
+
+        return exchange;
+    }
+
+    private void assertUnauthorizedResponse(ServerWebExchange exchange, Mono<String> result) {
+        assertTrue(result.blockOptional().isEmpty());
+        verify(exchange.getResponse()).setStatusCode(HttpStatus.UNAUTHORIZED);
+        verify(exchange.getResponse()).writeWith(any());
+    }
 }
