@@ -10,7 +10,7 @@ version = '0.0.1-SNAPSHOT'
 dependencies {
 	implementation project(':commons')
 	implementation 'org.springframework.cloud:spring-cloud-starter-gateway:4.2.0'
-	implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'com.h2database:h2'
 }
