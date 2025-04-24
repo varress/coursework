@@ -1,0 +1,109 @@
+{
+  "title": "Gateway Security Dashboard",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Out-of-Hours Usage (00:00 - 19:00)",
+      "targets": [
+        {
+          "expr": "sum(device_hourly_usage{hour=~\"(0[0-9]|1[0-9])\"})",
+          "legendFormat": "Out-of-hours requests",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 4},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 50},
+              {"color": "red", "value": 100}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "401 Unauthorized Requests",
+      "targets": [
+        {
+          "expr": "increase(http_server_requests_seconds_count{status=\"401\"}[5m])",
+          "legendFormat": "401 errors",
+          "refId": "B"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 4, "w": 6, "h": 4},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 10},
+              {"color": "red", "value": 30}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "429 Too Many Requests",
+      "targets": [
+        {
+          "expr": "increase(http_server_requests_seconds_count{status=\"429\"}[5m])",
+          "legendFormat": "429 errors",
+          "refId": "C"
+        }
+      ],
+      "gridPos": {"x": 6, "y": 4, "w": 6, "h": 4},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 10},
+              {"color": "red", "value": 30}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Slow Requests (>2s)",
+      "targets": [
+        {
+          "expr": "sum(increase(http_server_requests_seconds_bucket{le=\"+Inf\"}[5m])) - sum(increase(http_server_requests_seconds_bucket{le=\"2\"}[5m]))",
+          "legendFormat": "Slow requests",
+          "refId": "D"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 4},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "orange", "value": 10},
+              {"color": "red", "value": 20}
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "timezone": "browser",
+  "schemaVersion": 37,
+  "version": 1,
+  "refresh": "30s"
+}

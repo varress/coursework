@@ -1,6 +1,5 @@
 package fi.secureprogramming.gateway.services;
 
-import fi.secureprogramming.gateway.filters.LoggingFilter;
 import fi.secureprogramming.model.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,7 @@ public class MobileClientResolver implements KeyResolver {
     @Autowired
     private DeviceVerificationService deviceVerificationService;
 
-    private static final Logger logger = LoggerFactory.getLogger(LoggingFilter.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(MobileClientResolver.class.getName());
 
     @Override
     public Mono<String> resolve(ServerWebExchange exchange) {
@@ -62,7 +61,6 @@ public class MobileClientResolver implements KeyResolver {
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange, String reason) {
-        // Log request too
         logger.info(String.format("[RESPONSE] %s %s => %d",
                 exchange.getRequest().getMethod().name(),
                 exchange.getRequest().getURI(),

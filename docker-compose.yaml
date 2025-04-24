@@ -76,6 +76,15 @@ services:
       - "3000:3000"
     networks:
       - mynetwork
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    volumes:
+      - ./grafana/dashboards:/etc/grafana/dashboards
+      - ./grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasource.yml
+
 
 networks:
   mynetwork:
