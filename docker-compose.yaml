@@ -61,6 +61,15 @@ services:
     networks:
       - mynetwork
 
+  zaproxy:
+    image: zaproxy/zap-stable
+    container_name: zaproxy
+    command: ["sleep", "infinity"]
+    volumes:
+      - ./openapi.yaml:/zap/wrk/openapi.yaml
+    networks:
+      - mynetwork    
+
   prometheus:
     image: prom/prometheus
     volumes:
@@ -84,7 +93,6 @@ services:
       - ./grafana/dashboards:/etc/grafana/dashboards
       - ./grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
       - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasource.yml
-
 
 networks:
   mynetwork:

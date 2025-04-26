@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: read
-  security-events: write      
+  security-events: write
 
 jobs:
   build:
@@ -21,24 +21,23 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '18' 
+          java-version: '18'
           distribution: 'temurin'
 
       - name: Grant Execute Permissions for Gradlew
-        run: chmod +x ./gradlew          
+        run: chmod +x ./gradlew
 
       - name: Build Project
-      #TODO: FIX ME
-        run: ./gradlew build -x test 
+        run: ./gradlew build -x test
         env:
-            DB_HOST: ${{ secrets.DB_HOST }}
-            DB_PORT: ${{ secrets.DB_PORT }}
-            DB_NAME: ${{ secrets.DB_NAME }}
-            DB_USERNAME: ${{ secrets.DB_USERNAME }}
-            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-            REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-            REDIS_HOST: ${{ secrets.REDIS_HOST }}
-            REDIS_PORT: ${{ secrets.REDIS_PORT }}        
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
 
   sast:
     name: Static Application Security Testing (SAST)
@@ -55,7 +54,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: java
 
@@ -63,7 +62,7 @@ jobs:
         run: ./gradlew build -x test
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
 
   dast:
     name: Dynamic Application Security Testing (DAST)
@@ -79,28 +78,31 @@ jobs:
           java-version: '18'
           distribution: 'temurin'
           cache: gradle
-          
+
       - name: Install Docker-Compose
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose    
 
       - name: Grant Execute Permissions for Gradlew
-        run: chmod +x ./gradlew          
+        run: chmod +x ./gradlew
 
       - name: Build Project
         run: ./gradlew build -x test
         env:
-            DB_HOST: ${{ secrets.DB_HOST }}
-            DB_PORT: ${{ secrets.DB_PORT }}
-            DB_NAME: ${{ secrets.DB_NAME }}
-            DB_USERNAME: ${{ secrets.DB_USERNAME }}
-            DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-            REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-            REDIS_HOST: ${{ secrets.REDIS_HOST }}
-            REDIS_PORT: ${{ secrets.REDIS_PORT }}
-            
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+
       - name: Start Application
+        run: |
+          docker-compose up -d
+          sleep 30
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
@@ -111,15 +113,20 @@ jobs:
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
-        run: |
-          docker-compose up -d
-          sleep 30 # Wait for the application to start
 
-      - name: Run OWASP ZAP DAST
-        uses: zaproxy/action-full-scan@v0.7.0
+      - name: Wait for services to be healthy
+        run: sleep 20
+
+      - name: Run OWASP ZAP API Scan
+        run: |
+          docker run --network coursework_mynetwork -v ${PWD}:/zap/wrk/:rw -t zaproxy/zap-stable zap-api-scan.py \
+            -f openapi -t /zap/wrk/openapi.yaml -r zap-report.html
+
+      - name: Upload DAST Report
+        uses: actions/upload-artifact@v4.6.2
         with:
-          target: 'http://gateway:8081' 
-          #rules_file_name: '.zap/rules.json'
+          name: dast-report
+          path: zap-report.html
 
       - name: Stop Application
         run: docker-compose down

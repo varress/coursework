@@ -1,0 +1,282 @@
+{
+	"info": {
+		"_postman_id": "a9cf5b0d-cc6d-404a-9a31-683bf2be6c52",
+		"name": "Secure Programming Course",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "gateway Save procuct",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Mice\",\r\n  \"price\": 19.99,\r\n  \"description\": \"High-performance mouse.\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "gateway Registration",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"uuid\": \"myrandomuuid2\",\r\n  \"secret\": \"xxxxx\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8081/device/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"device",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "gateway devices",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/device",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"device"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "gateway products",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Your secret key\r",
+							"const secret = 'Ä·Ø±ÕÖÊm~╬Àõç©';  // This should be the secret shared with the server\r",
+							"\r",
+							"// Data to sign\r",
+							"const uuid = 'essi';  // Replace with the actual UUID\r",
+							"const timestamp = '1617812345';  // Replace with the actual timestamp\r",
+							"\r",
+							"// Concatenate uuid and timestamp with colon\r",
+							"const datax = `${uuid}:${timestamp}`;\r",
+							"\r",
+							"// Compute HMAC-SHA256\r",
+							"const signature = CryptoJS.HmacSHA256(datax, secret).toString(CryptoJS.enc.Hex);  // This will produce a base64 encoded signature, I AM NOT SURE ABOUT THIS..?\r",
+							"\r",
+							"// Add the signature to the request header\r",
+							"pm.environment.set('signature', signature);  // Store the signature in the environment variable\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Device-UUID",
+						"value": "myrandomuuid2",
+						"type": "text"
+					},
+					{
+						"key": "X-Signature",
+						"value": "{{signature}}",
+						"type": "text"
+					},
+					{
+						"key": "X-Timestamp",
+						"value": "1617812345",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "actuator",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Your secret key\r",
+							"const secret = 'Ä·Ø±ÕÖÊm~╬Àõç©';  // This should be the secret shared with the server\r",
+							"\r",
+							"// Data to sign\r",
+							"const uuid = 'essi';  // Replace with the actual UUID\r",
+							"const timestamp = '1617812345';  // Replace with the actual timestamp\r",
+							"\r",
+							"// Concatenate uuid and timestamp with colon\r",
+							"const datax = `${uuid}:${timestamp}`;\r",
+							"\r",
+							"// Compute HMAC-SHA256\r",
+							"const signature = CryptoJS.HmacSHA256(datax, secret).toString(CryptoJS.enc.Hex);  // This will produce a base64 encoded signature, I AM NOT SURE ABOUT THIS..?\r",
+							"\r",
+							"// Add the signature to the request header\r",
+							"pm.environment.set('signature', signature);  // Store the signature in the environment variable\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Device-UUID",
+						"value": "myrandomuuid2",
+						"type": "text"
+					},
+					{
+						"key": "X-Signature",
+						"value": "{{signature}}",
+						"type": "text"
+					},
+					{
+						"key": "X-Timestamp",
+						"value": "1617812345",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "weird endpoint",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Your secret key\r",
+							"const secret = 'Ä·Ø±ÕÖÊm~╬Àõç©';  // This should be the secret shared with the server\r",
+							"\r",
+							"// Data to sign\r",
+							"const uuid = 'essi';  // Replace with the actual UUID\r",
+							"const timestamp = '1617812345';  // Replace with the actual timestamp\r",
+							"\r",
+							"// Concatenate uuid and timestamp with colon\r",
+							"const datax = `${uuid}:${timestamp}`;\r",
+							"\r",
+							"// Compute HMAC-SHA256\r",
+							"const signature = CryptoJS.HmacSHA256(datax, secret).toString(CryptoJS.enc.Hex);  // This will produce a base64 encoded signature, I AM NOT SURE ABOUT THIS..?\r",
+							"\r",
+							"// Add the signature to the request header\r",
+							"pm.environment.set('signature', signature);  // Store the signature in the environment variable\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Device-UUID",
+						"type": "text",
+						"value": "myrandomuuid2"
+					},
+					{
+						"key": "X-Signature",
+						"type": "text",
+						"value": "{{signature}}"
+					},
+					{
+						"key": "X-Timestamp",
+						"type": "text",
+						"value": "1617812345"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/weirdo",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"weirdo"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

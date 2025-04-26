@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  title: Secure Programming Course
+  version: 1.0.0
+servers:
+  - url: http://gateway:8080
+paths:
+  /products:
+    post:
+      tags:
+        - default
+      summary: gateway Save procuct
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\r\n  \"name\": \"Mice\",\r\n  \"price\": 19.99,\r\n
+                \"description\": \"High-performance mouse.\"\r\n}"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - default
+      summary: actuator
+      parameters:
+        - name: X-Device-UUID
+          in: header
+          schema:
+            type: string
+          example: myrandomuuid2
+        - name: X-Signature
+          in: header
+          schema:
+            type: string
+          example: '{{signature}}'
+        - name: X-Timestamp
+          in: header
+          schema:
+            type: integer
+          example: '1617812345'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /device/register:
+    post:
+      tags:
+        - default
+      summary: gateway Registration
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: >-
+                "{\r\n  \"uuid\": \"myrandomuuid2\",\r\n  \"secret\":
+                \"xxxxx\"\r\n}"
+      parameters:
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /device:
+    get:
+      tags:
+        - default
+      summary: gateway devices
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /weirdo:
+    get:
+      tags:
+        - default
+      summary: weird endpoint
+      parameters:
+        - name: X-Device-UUID
+          in: header
+          schema:
+            type: string
+          example: myrandomuuid2
+        - name: X-Signature
+          in: header
+          schema:
+            type: string
+          example: '{{signature}}'
+        - name: X-Timestamp
+          in: header
+          schema:
+            type: integer
+          example: '1617812345'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
