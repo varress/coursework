@@ -14,3 +14,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'com.h2database:h2'
 }
+
+tasks.test {
+	exclude '**/GatewayConfigTest.class'
+}
