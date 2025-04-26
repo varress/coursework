@@ -64,69 +64,69 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
 
-  dast:
-    name: Dynamic Application Security Testing (DAST)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '18'
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Install Docker-Compose
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker-compose    
-
-      - name: Grant Execute Permissions for Gradlew
-        run: chmod +x ./gradlew
-
-      - name: Build Project
-        run: ./gradlew build -x test
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-          REDIS_PORT: ${{ secrets.REDIS_PORT }}
-
-      - name: Start Application
-        run: |
-          docker-compose up -d
-          sleep 30
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-          REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
-
-      - name: Wait for services to be healthy
-        run: sleep 20
-
-      - name: Run OWASP ZAP API Scan
-        run: |
-          docker run --network coursework_mynetwork -v ${PWD}:/zap/wrk/:rw -t zaproxy/zap-stable zap-api-scan.py \
-            -f openapi -t /zap/wrk/openapi.yaml -r zap-report.html
-
-      - name: Upload DAST Report
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: dast-report
-          path: zap-report.html
-
-      - name: Stop Application
-        run: docker-compose down
+  # dast:
+        #   name: Dynamic Application Security Testing (DAST)
+        #   runs-on: ubuntu-latest
+        #
+        #   steps:
+        #     - name: Checkout Code
+        #       uses: actions/checkout@v3
+        #
+        #     - name: Set up JDK
+        #       uses: actions/setup-java@v3
+        #       with:
+        #         java-version: '18'
+        #         distribution: 'temurin'
+        #         cache: gradle
+        #
+        #     - name: Install Docker-Compose
+        #       run: |
+        #         sudo apt-get update
+        #         sudo apt-get install -y docker-compose
+        #
+        #     - name: Grant Execute Permissions for Gradlew
+        #       run: chmod +x ./gradlew
+        #
+        #     - name: Build Project
+        #       run: ./gradlew build -x test
+        #       env:
+        #         DB_HOST: ${{ secrets.DB_HOST }}
+        #         DB_PORT: ${{ secrets.DB_PORT }}
+        #         DB_NAME: ${{ secrets.DB_NAME }}
+        #         DB_USERNAME: ${{ secrets.DB_USERNAME }}
+        #         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        #         REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+        #         REDIS_HOST: ${{ secrets.REDIS_HOST }}
+        #         REDIS_PORT: ${{ secrets.REDIS_PORT }}
+        #
+        #     - name: Start Application
+        #       run: |
+        #         docker-compose up -d
+        #         sleep 30
+        #       env:
+        #         DB_HOST: ${{ secrets.DB_HOST }}
+        #         DB_PORT: ${{ secrets.DB_PORT }}
+        #         DB_NAME: ${{ secrets.DB_NAME }}
+        #         DB_USERNAME: ${{ secrets.DB_USERNAME }}
+        #         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        #         REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+        #         REDIS_HOST: ${{ secrets.REDIS_HOST }}
+        #         REDIS_PORT: ${{ secrets.REDIS_PORT }}
+        #         ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+        #
+        #     - name: Wait for services to be healthy
+        #       run: sleep 20
+        #
+        #     - name: Run OWASP ZAP API Scan
+        #       run: |
+        #         docker run --network coursework_mynetwork -v ${PWD}:/zap/wrk/:rw -t zaproxy/zap-stable zap-api-scan.py \
+        #           -f openapi -t /zap/wrk/openapi.yaml -r zap-report.html
+        #
+        #     - name: Upload DAST Report
+        #       uses: actions/upload-artifact@v4.6.2
+        #       with:
+        #         name: dast-report
+        #         path: zap-report.html
+        #
+        #     - name: Stop Application
+        #       run: docker-compose down

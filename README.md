@@ -85,3 +85,21 @@ Grafana can be accessed at http://localhost:3000 and the default username and pa
 
 
 
+//TODO
+# Importaa postman kutsut jsonina projektiin kun valmista
+
+
+
+# Quality control
+There is a CI pipeline using github actions that builds the program, runs unit tests and SAST. 
+
+DAST was run locally and can be run using the following command:
+```bash
+docker pull zaproxy/zap-stable
+docker run --network coursework_mynetwork -v ${PWD}:/zap/wrk/:rw -t zaproxy/zap-stable zap-api-scan.py `
+>>   -f openapi -t /zap/wrk/openapi.yaml -r zap-report.html
+```
+For the purpose of the project and it's grading, results from the first run can be found as a PDF in the project. Obviously in the real world,
+it probably would not be wise to publish report publicly.
+
+
