@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 @Entity
 public class Device {
     @Id
+    @Column(nullable = false, length = 50)
     private String uuid;
 
     @Column(nullable = false)

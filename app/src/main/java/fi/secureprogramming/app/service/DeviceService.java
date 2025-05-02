@@ -6,11 +6,6 @@ import fi.secureprogramming.service.EncryptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import javax.security.sasl.AuthenticationException;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
