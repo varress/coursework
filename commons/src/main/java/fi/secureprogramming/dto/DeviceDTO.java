@@ -6,14 +6,12 @@ import lombok.Data;
 @Data
 public class DeviceDTO {
     private String uuid;
-    private String secret;
 
     public DeviceDTO() {
     }
 
-    public DeviceDTO(String uuid, String secret) {
+    public DeviceDTO(String uuid) {
         this.uuid = uuid;
-        this.secret = secret;
     }
 
     public static DeviceDTO fromEntity(Device device) {
@@ -22,20 +20,11 @@ public class DeviceDTO {
         }
 
         return new DeviceDTO(
-                device.getUuid(),
-                device.getSecret()
+                device.getUuid()
         );
-    }
-
-    public Device toEntity() {
-        return new Device(this.uuid, this.secret, true);
     }
 
     public String getUuid() {
         return uuid;
-    }
-
-    public String getSecret() {
-        return secret;
     }
 }

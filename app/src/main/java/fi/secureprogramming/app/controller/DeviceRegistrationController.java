@@ -2,6 +2,7 @@ package fi.secureprogramming.app.controller;
 
 import fi.secureprogramming.app.service.DeviceService;
 import fi.secureprogramming.dto.DeviceDTO;
+import fi.secureprogramming.model.Device;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class DeviceRegistrationController {
     //TODO error handling.. activate inactive - call onnly from logic?
 
     @PostMapping("/register")
-    public ResponseEntity<Void> registerDevice(@RequestBody DeviceDTO device) {
+    public ResponseEntity<Void> registerDevice(@RequestBody Device device) {
         if (device.getSecret() == null || device.getSecret().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
