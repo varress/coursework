@@ -31,7 +31,21 @@ public class DeviceService {
             throw new IllegalArgumentException("Device already registered");
         });
 
-        byte[] decodedSecret = Base64.getDecoder().decode(secret);
+        if (uuid == null || uuid.length() < 16) {
+            throw new IllegalArgumentException("UUID must be at least 16 characters long");
+        }
+
+        byte[] decodedSecret;
+        try {
+            decodedSecret = Base64.getDecoder().decode(secret);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Secret must be a valid Base64-encoded string");
+        }
+
+        if (decodedSecret.length < 32) {
+            throw new IllegalArgumentException("Insecure secret length");
+        }
+
         String encryptedSecret = encryptionService.encrypt(new String(decodedSecret));
         Device device = new Device(uuid, encryptedSecret, true);
         deviceRepository.save(device);
