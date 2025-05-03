@@ -103,23 +103,22 @@ it probably would not be wise to publish report publicly.
 
 Application doesn't have any functionality where *object level authorization* is needed. If necessary in the future, there could be authenticated users how were the only one's allowed to add products and editing or removing the products should have a verification that the request is made by the same user how owns the product. 
 
-Gateway is providing public endpoints, identifying API client using hmac signed requests and allowed device registry. UUID and the client secret is required to be long. AES is used to encrypt each client key before saving to database. Even though authentication is out of the scope of this project, client identification is done by following good practices. It would be smart to force clients rotating the secrets regularly.
+The gateway provides public endpoints and identifies API clients using HMAC-signed requests and an allowed device registry. UUIDs and client secrets are required to meet length requirements. Client secrets are encrypted using AES before being stored in the database. While authentication is out of scope for this project, client identification follows best practices. It is recommended to enforce periodic secret rotation for clients.
 
-Returning only DTO objects is a simple yet effective way to prevent broken object property level authorization - by including only non-sensitive fields in objects used in responses. 
+Returning only DTO objects is an effective way to prevent broken object property-level authorization by including only non-sensitive fields in response objects
 
-Rate limiting is implemented to prevent denial of service attacks. Data models have maxium limits. Only requests with valid input are allowed, incorrect field names or additional fields in ProductDTO's will throw an exception.
+Rate limiting is implemented to mitigate denial-of-service attacks. Data models enforce maximum limits, and only requests with valid input are processed. Invalid field names or additional fields in ProductDTO objects result in exceptions.
 
-There is currently no authentication or authorization, but all the admin endpoints are under /admin/ path and filter can be easily added in GatewayConfig to those endpoints.
+Currently, there is no authentication or authorization, but all admin endpoints are under the /admin/ path. Filters can easily be added in GatewayConfig to secure these endpoints.
 
-As the actual API of the application is only a dummy application to test the gateway, there is no harm of violating business flows. In a real word application, this could be avoided using filters in gateway as well as other checks in the application side by first identifying sensitive flows. White and black listing devices that is implemented in a gateway is a one way to help.
+Since the API is a dummy application for testing the gateway, there is no risk of violating business flows. In a real-world application, sensitive flows could be protected using gateway filters and additional application-side checks. The implemented device whitelisting and blacklisting in the gateway also enhance security.
 
-Server Side Request Forgery is not possible in current application. Products could easily though have pictures that could be added using url's of the photos and security measures should then be applied.
+The application is not vulnerable to Server-Side Request Forgery (SSRF) in its current state. However, if products were to include image URLs, appropriate security measures should be applied to validate and sanitize these URLs.
 
-Software is intended to expose as little as possible but it is suggested to keep reviewing configurations continuously. Trivy filescan was done and results are in the repository to help to identify vulnerabilities. Obviously it is not sensible to publish results in a real project.
+The software is designed to minimize exposure, but it is recommended to continuously review configurations. A Trivy file scan was performed, and the results are included in the repository to identify vulnerabilities. In a real-world project, publishing such results would not be advisable.
 
-When going into production it is important to keep the documentation up to date. The documentation should include information about the endpoints, request and response formats, and any authentication or authorization requirements.
+Before going into production, it is crucial to maintain up-to-date documentation. This should include details about endpoints, request and response formats, and any authentication or authorization requirements.
 
-If the API used in the project wasn't our own - it would be necessary to validate and sanitize responses in the GatewayConfig. 
-
+If the API used in the project were external, it would be necessary to validate and sanitize responses in the GatewayConfig.
 
 # Future improvements
