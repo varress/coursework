@@ -3,7 +3,7 @@ info:
   title: Secure Programming Course
   version: 1.0.0
 servers:
-  - url: http://gateway:8080
+  - url: http://localhost:8081
 paths:
   /products:
     post:
@@ -65,8 +65,8 @@ paths:
             schema:
               type: string
               example: >-
-                "{\r\n  \"uuid\": \"myrandomuuid2\",\r\n  \"secret\":
-                \"xxxxx\"\r\n}"
+                "{\r\n  \"uuid\": \"essi11111111111111112\",\r\n  \"secret\":
+                \"w4TCt8OYwrHDlcOWw4ptfuKVrMOAw7XDp8Kp\"\r\n}"
       parameters:
         - name: Content-Type
           in: header
@@ -78,11 +78,21 @@ paths:
           description: Successful response
           content:
             application/json: {}
-  /device:
+  /device/admin/devices:
     get:
       tags:
         - default
       summary: gateway devices
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /device:
+    get:
+      tags:
+        - default
+      summary: gateway devices inactivate
       responses:
         '200':
           description: Successful response

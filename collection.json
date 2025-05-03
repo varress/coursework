@@ -36,6 +36,11 @@
 		},
 		{
 			"name": "gateway Registration",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
 			"request": {
 				"method": "POST",
 				"header": [
@@ -47,7 +52,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"uuid\": \"myrandomuuid2\",\r\n  \"secret\": \"xxxxx\"\r\n}"
+					"raw": "{\r\n  \"uuid\": \"essi11111111111111112\",\r\n  \"secret\": \"w4TCt8OYwrHDlcOWw4ptfuKVrMOAw7XDp8Kp\"\r\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8081/device/register",
@@ -66,6 +71,30 @@
 		},
 		{
 			"name": "gateway devices",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/device/admin/devices",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"device",
+						"admin",
+						"devices"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "gateway devices inactivate",
 			"protocolProfileBehavior": {
 				"disabledSystemHeaders": {}
 			},
@@ -94,20 +123,21 @@
 					"script": {
 						"exec": [
 							"// Your secret key\r",
-							"const secret = 'Ä·Ø±ÕÖÊm~╬Àõç©';  // This should be the secret shared with the server\r",
+							"const secret = 'Çƒî5pË?ÁÃ¶ëLÈªÚn{¹¾(2Y}N÷╩½';  // This should be the secret shared with the server\r",
 							"\r",
 							"// Data to sign\r",
-							"const uuid = 'essi';  // Replace with the actual UUID\r",
+							"const uuid = 'essi11111111111111113';  // Replace with the actual UUID\r",
 							"const timestamp = '1617812345';  // Replace with the actual timestamp\r",
 							"\r",
 							"// Concatenate uuid and timestamp with colon\r",
 							"const datax = `${uuid}:${timestamp}`;\r",
 							"\r",
 							"// Compute HMAC-SHA256\r",
-							"const signature = CryptoJS.HmacSHA256(datax, secret).toString(CryptoJS.enc.Hex);  // This will produce a base64 encoded signature, I AM NOT SURE ABOUT THIS..?\r",
+							"const signature = CryptoJS.HmacSHA256(datax, secret).toString(CryptoJS.enc.Base64);  // This will produce a base64 encoded signature\r",
 							"\r",
-							"// Add the signature to the request header\r",
-							"pm.environment.set('signature', signature);  // Store the signature in the environment variable\r",
+							"// Add and uuid the signature to the request header\r",
+							"pm.environment.set('signature', signature); \r",
+							"pm.environment.set('uuid', uuid)\r",
 							""
 						],
 						"type": "text/javascript"
@@ -122,7 +152,7 @@
 				"header": [
 					{
 						"key": "X-Device-UUID",
-						"value": "myrandomuuid2",
+						"value": "{{uuid}}",
 						"type": "text"
 					},
 					{
