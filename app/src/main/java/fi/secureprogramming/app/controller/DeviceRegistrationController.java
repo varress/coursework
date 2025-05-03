@@ -19,9 +19,7 @@ public class DeviceRegistrationController {
     @Autowired
     private DeviceService deviceService;
 
-    private Logger logger = LoggerFactory.getLogger(DeviceRegistrationController.class);
-
-    //TODO error handling.. activate inactive - call onnly from logic?
+    private final Logger logger = LoggerFactory.getLogger(DeviceRegistrationController.class);
 
     @PostMapping("/register")
     public ResponseEntity<Void> registerDevice(@RequestBody Device device) {
@@ -37,12 +35,12 @@ public class DeviceRegistrationController {
             deviceService.register(device.getUuid(), device.getSecret());
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            logger.error("Error registering device", e); //fixme
+            logger.error("Error registering device", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    @PostMapping("/inactivate")
+    @PostMapping("/admin/inactivate")
     public ResponseEntity<Void> unregisterDevice(@RequestBody DeviceDTO device) {
         try {
             deviceService.inactivateDevice(device.getUuid());
@@ -52,7 +50,7 @@ public class DeviceRegistrationController {
         }
     }
 
-    @PostMapping("/activate")
+    @PostMapping("/admin/activate")
     public ResponseEntity<Void> activateDevice(@RequestBody DeviceDTO device) {
         try {
             deviceService.activateDevice(device.getUuid());
@@ -62,7 +60,7 @@ public class DeviceRegistrationController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/admin/devices")
     public ResponseEntity<List<DeviceDTO>> getDevices() {
         List<DeviceDTO> devices = deviceService.getAllDevices().stream().map(DeviceDTO::fromEntity).toList();
         return ResponseEntity.ok(devices);

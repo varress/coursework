@@ -7,11 +7,18 @@ import lombok.Data;
 public class DeviceDTO {
     private String uuid;
 
+    private boolean active;
+
     public DeviceDTO() {
     }
 
     public DeviceDTO(String uuid) {
         this.uuid = uuid;
+    }
+
+    public DeviceDTO(String uuid, boolean active) {
+        this.uuid = uuid;
+        this.active = active;
     }
 
     public static DeviceDTO fromEntity(Device device) {
@@ -20,11 +27,16 @@ public class DeviceDTO {
         }
 
         return new DeviceDTO(
-                device.getUuid()
+                device.getUuid(),
+                device.isActive()
         );
     }
 
     public String getUuid() {
         return uuid;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 }

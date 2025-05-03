@@ -50,26 +50,9 @@ public class GatewayConfig {
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipAddressResolver)))
                         .uri("http://app:8080"))
-                .route("inactivate", inactivateDeviceRoute -> inactivateDeviceRoute
-                        .path("/device/inactivate")
-                        .and().method("POST")
-                        .filters(inactivateDeviceFilters -> inactivateDeviceFilters
-                                .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
-                                        .setRateLimiter(redisRateLimiter)
-                                        .setKeyResolver(ipAddressResolver)))
-                        .uri("http://app:8080"))
-                .route("activate", activateDeviceRoute -> activateDeviceRoute
-                        .path("/device/activate")
-                        .and().method("POST")
-                        .filters(activateDeviceFilters -> activateDeviceFilters
-                                .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
-                                        .setRateLimiter(redisRateLimiter)
-                                        .setKeyResolver(ipAddressResolver)))
-                        .uri("http://app:8080"))
-                .route("get-devices", getDevicesRoute -> getDevicesRoute
-                        .path("/device")
-                        .and().method("GET")
-                        .filters(getDevicesFilters -> getDevicesFilters
+                .route("admin-endpoints", adminRoute -> adminRoute
+                        .path("/device/admin/**")
+                        .filters(adminFilters -> adminFilters
                                 .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipAddressResolver)))
