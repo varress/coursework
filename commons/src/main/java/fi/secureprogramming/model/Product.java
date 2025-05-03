@@ -1,4 +1,4 @@
-package fi.secureprogramming.app.model;
+package fi.secureprogramming.model;
 
 import jakarta.persistence.*;
 

@@ -1,5 +1,6 @@
 package fi.secureprogramming.gateway.config;
 
+import fi.secureprogramming.dto.ProductDTO;
 import fi.secureprogramming.gateway.services.IPAddressResolver;
 import fi.secureprogramming.gateway.services.MobileClientResolver;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
@@ -27,6 +28,7 @@ public class GatewayConfig {
                 .route("create-product", createProductRoute -> createProductRoute
                         .path("/products")
                         .and().method("POST")
+                        .and().readBody(ProductDTO.class, productDTO -> true)
                         .filters(createProductFilters -> createProductFilters
                                 .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
                                         .setRateLimiter(redisRateLimiter)

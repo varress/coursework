@@ -1,6 +1,6 @@
-package fi.secureprogramming.app.dto;
+package fi.secureprogramming.dto;
 
-import fi.secureprogramming.app.model.Product;
+import fi.secureprogramming.model.Product;
 import lombok.Data;
 
 @Data
@@ -46,5 +46,21 @@ public class ProductDTO {
         product.setPrice(this.price);
         product.setDescription(this.description);
         return product;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

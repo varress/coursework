@@ -19,3 +19,7 @@ management:
   metrics:
     tags:
       application: gateway-service
+
+  jackson:
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: true

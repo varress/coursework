@@ -1,8 +1,8 @@
 package fi.secureprogramming.app.controller;
 
-import fi.secureprogramming.app.dto.ProductDTO;
-import fi.secureprogramming.app.model.Product;
 import fi.secureprogramming.app.service.ProductService;
+import fi.secureprogramming.dto.ProductDTO;
+import fi.secureprogramming.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
