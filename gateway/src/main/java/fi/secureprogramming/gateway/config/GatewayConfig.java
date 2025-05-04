@@ -10,6 +10,11 @@ import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Gateway configuration class that sets up the routes and filters for the Spring Cloud Gateway.
+ * It defines the routes for creating products, getting products, registering devices, and admin endpoints.
+ * Each route has its own rate limiting and filtering logic.
+ */
 @Configuration
 public class GatewayConfig {
 

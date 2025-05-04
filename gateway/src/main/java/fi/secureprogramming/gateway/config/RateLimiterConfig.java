@@ -4,6 +4,10 @@ import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/*
+ * This class configures the rate limiter for the Spring Cloud Gateway.
+ * It uses Redis as the backend for storing rate limit information.
+ */
 @Configuration
 public class RateLimiterConfig {
 

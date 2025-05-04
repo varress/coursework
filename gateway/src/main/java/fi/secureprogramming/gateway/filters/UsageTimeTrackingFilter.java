@@ -11,6 +11,11 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+/**
+ * Filter to track usage time of devices.
+ * This filter increments a Redis key for each device
+ * based on the current hour and sets an expiration time of 30 days.
+ */
 @Component
 @Order(2)
 public class UsageTimeTrackingFilter implements GlobalFilter {

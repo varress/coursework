@@ -6,6 +6,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 
+/*
+ * This class configures the Redis connection factory for the Spring Cloud Gateway.
+ * It uses Lettuce as the Redis client.
+ */
 @Configuration
 public class RedisConfig {
 

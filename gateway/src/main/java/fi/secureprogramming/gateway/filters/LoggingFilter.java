@@ -17,6 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 
+/**
+ * A filter that logs incoming requests and outgoing responses.
+ * It logs the request method, URI, IP address, UUID, User-Agent, and timestamp.
+ * It also logs the response status code.
+ */
 @Component
 @Order(1)
 public class LoggingFilter implements GlobalFilter {

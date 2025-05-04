@@ -13,6 +13,9 @@ import javax.security.sasl.AuthenticationException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/**
+ * Service for verifying device by verifying the signature and checking if the device is registered and active.
+ */
 @Service
 public class DeviceVerificationService {
 
