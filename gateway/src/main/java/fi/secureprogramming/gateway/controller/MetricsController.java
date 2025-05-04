@@ -2,6 +2,8 @@ package fi.secureprogramming.gateway.controller;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tags;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +31,7 @@ public class MetricsController {
     private final ReactiveStringRedisTemplate redisTemplate;
     private final MeterRegistry meterRegistry;
     private final Map<String, AtomicLong> gauges = new ConcurrentHashMap<>();
+    private static final Logger logger = LoggerFactory.getLogger(MetricsController.class);
 
     public MetricsController(ReactiveStringRedisTemplate redisTemplate, MeterRegistry meterRegistry) {
         this.redisTemplate = redisTemplate;
@@ -65,11 +68,11 @@ public class MetricsController {
                                 }).set(count); // Dynamically update the value
 
                             } catch (Exception e) {
-                                System.err.println("Gauge parse error for key " + key + ": " + e.getMessage());
+                                logger.error("Gauge parse error for key {}: {}", key, e.getMessage());
                             }
                             return Mono.empty();
                         }))
-                .onErrorContinue((e, o) -> System.err.println("Metric export error: " + e.getMessage()))
+                .onErrorContinue((e, o) -> logger.error("Metric export error: {}", e.getMessage()))
                 .subscribe();
     }
 }

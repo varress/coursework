@@ -138,6 +138,7 @@ If the API used in the project were external, it would be necessary to validate 
 
 # Future improvements
 Admin endpoints should be secured with authentication and authorization.
+It would be wise to add dependency check for the libraries used in the project, to make sure that there are no known vulnerabilities in the libraries used.
 
 # AI Usage
 The project was developed with the help of AI tools, including ChatGPT and GitHub Copilot. ChatGPT was used to give ideas

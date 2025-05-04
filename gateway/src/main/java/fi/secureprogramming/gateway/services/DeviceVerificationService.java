@@ -46,6 +46,13 @@ public class DeviceVerificationService {
         return device;
     }
 
+    public void inactivateDevice(String uuid) throws Exception {
+        Device device = deviceRepository.findById(uuid).orElseThrow(() -> new Exception("Device not found"));
+        device.setActive(false);
+
+        deviceRepository.save(device);
+    }
+
     private String hmacSha256(String signature, String data) {
         try {
             SecretKeySpec key = new SecretKeySpec(signature.getBytes(), "HmacSHA256");
