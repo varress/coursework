@@ -2,7 +2,6 @@
 -General description: How the program is used and to what purpose and describtion of user interface especially form those parts that are not self-evident.
 -Structure of the program
 -Secure programming solutions: How and in which parts of the code? You should also comment the code itself. You should use a checklist, for example OWASP TOP 10 or SANS 25. Describe how issues have been solved.
--In case the program is based on earlier work, report the changes
 -You should include at least manual security testing, but it is highly recommended to do more extensive testing. Report testing and also what you found and what you fixed based on testing. If you made the DevSecOps exercise it is a good idea to use the pipeline throughout the programming project.
 -In case something was not yet implemented, document that as well.
 -If you know there is security issue or vulnerability, document that as well.
@@ -10,36 +9,43 @@
 
 
 ## Secure Programming Coursework
-This is a project for the Secure Programming course at the University of Tampere. The goal of this project was to create a secure API gateway that communicates 
-with a backend service. The scope was to focus on rate limiting, monitoring and finding a way to provide public endpoints for mobile clients - in a way that login action
-is not needed but so that clients can be blacklisted if needed. The project was implemented using Java and Spring Boot, with a focus on security best practices and principles.
+This is a project for the Secure Programming course at the University of Tampere. 
+The goal of this project was to create a secure API gateway that communicates 
+with a backend service. The scope was to focus on rate limiting, monitoring and finding a way 
+to provide public endpoints for mobile clients - in a way that login action
+is not needed but so that clients can be blacklisted if needed. 
+The project was implemented using Java and Spring Boot, with a focus on 
+security best practices and principles.
 
-Scope was created with the primary goal of exploring new advancements in gateway security features.
+Scope was created with the primary goal of exploring new advancements 
+in gateway security features.
 
 ### Parts
-- API Gateway: The main entry point for clients to access the backend service. It handles authentication, rate limiting, and monitoring.
+- API Gateway: The main entry point for clients to access the backend service. It handles identifying clients, black listing, white listing, rate limiting, and monitoring.
+Monitoring has a dashboard in Grafana for unauthenticated and too many requests errors as well as
+unusual usage times per client. Metrics are collected using Prometheus. 
 - Backend Service: The service that the API Gateway communicates with. It handles the actual business logic and data processing. This is just a dummy service for testing purposes.
 - Common Library: A shared library that contains common code used by both the API Gateway and the backend service. This includes utility functions, data models, and security-related code.
 - Docker Compose: A configuration file for Docker Compose that defines the services, networks, and volumes used in the project. This allows for easy deployment and management of the services.
 - Grafana and Prometheus: Monitoring tools used to visualize and analyze the performance of the API Gateway and backend service. Grafana is used for creating dashboards and visualizations, while Prometheus is used for collecting and storing metrics.
-- Postman: A tool used for testing and interacting with the API. It allows for easy testing of endpoints, sending requests, and viewing responses. Postman collections are included in the project for easy testing of the API Gateway and backend service.
+- Postman: A tool used for testing and interacting with the API. It allows easy manual testing of endpoints, sending requests, and viewing responses. Postman collections are included in the project.
 - Unit Tests: A set of unit tests for the API Gateway and backend service. These tests cover various aspects of the code, including security and functionality. The tests are run using JUnit and Mockito.
 - Integration Tests: A set of integration tests for the API Gateway and backend service. These tests cover the interaction between the two services, ensuring that they work together as expected. The tests are run using Spring Boot Test and Mockito.
 - Security Testing: A set of security tests for the API Gateway. The tests are run using OWASP ZAP and CodeQL static application security testing.
 
 ## API Gateway
-Gateway is the main entry point for clients to access the backend service. It handles authentication, rate limiting, and monitoring. The API Gateway is implemented using Spring Boot and Java.
+Gateway is the main entry point for clients to access the backend service. The API Gateway is implemented using Spring Boot and Java.
 It is a Spring Cloud Gateway project. Routing for endpoints is implemented in GatewayConfig, there are endpoints for public usage and for admin usage. Rate limiting
 is implemented using Redis and Spring Cloud Gateway's built-in rate limiting features. Endpoints created for mobile client use the mobile client UUID for rate limiting, to count
-requests per client and admin endpoints use ip-address. Mobile clients are registered using a registration endpoint, that is called by the mobile client, where POST request
-is expected to contain an UUID and a base64 encoded 32-byte key for authentication. UUID and key are saved to the database (key is saved as encrypted using AES encryption)
+requests per client and admin endpoints use ip-address. If there is too many requests coming from mobile client, the client
+will be set to the black list and cannot make any more calls, before admin has activated it again. Mobile clients are registered using a registration endpoint, that is called by the mobile client, where POST request
+is expected to contain a 16 digits long UUID and a base64 encoded 32-byte key. UUID and key are saved to the database, key is saved as encrypted using AES encryption,
 and the authenticity of the later requests is verified using HMAC-SHA256 signing: requests must contain the UUID, a timestamp, and a signature in the header. The signature is generated by concatenating the UUID and timestamp with a colon, 
-and then signing it using HMAC-SHA256 with the shared secret key. Requests that do not contain the correct signature and the UUID is not saved as an active device are rejected. 
-
+and then signing it using HMAC-SHA256 with the shared secret key. Requests that do not contain the correct signature and the UUID is not an active device are rejected.
 
 The API Gateway also includes monitoring and logging features, which are implemented using Micrometer and Prometheus. Request and responses are logged, without sensitive data, 
-and metrics are collected and sent to Prometheus for monitoring. There is also a UsageTimeTrackingFilter to track the time taken for each request and response so
-that requests coming on unusual times can be detected. There is also a Grafana dashboard included in the project for visualizing the metrics and monitoring the performance of the API Gateway.
+and metrics are collected and sent to Prometheus for monitoring. There is also a UsageTimeTrackingFilter to track the time for each request and response so
+that requests coming on unusual times can be detected. There is also a Grafana dashboard included in the project for visualizing the security metrics of the API Gateway.
 
 # How to run the project
 
@@ -57,7 +63,7 @@ DB_PASSWORD=mypassword
 REDIS_PASSWORD=mypassword
 REDIS_HOST=redis
 REDIS_PORT=6379
-ENCRYPTION_KEY=
+ENCRYPTION_KEY=readFromBelow
 GF_SECURITY_ADMIN_USER=admin
 GF_SECURITY_ADMIN_PASSWORD=admin
 ```
@@ -79,9 +85,10 @@ docker-compose up --build -d
 ```
 
 ## Using the application
-There is a json file included in the project for Postman, which contains the endpoints and example requests.
+There is a json file included in the project for Postman, which contains the endpoints and example requests. It can be imported into Postman for easy testing.
 
 Grafana can be accessed at http://localhost:3000 and the default username and password are admin/admin. There is a dashboard configured that uses Prometheus as the data source.
+One can and should also create alerts in grafana for unusual usage times, too many unauthenticated responses and too many requests responses.
 
 
 # Quality control
@@ -96,10 +103,18 @@ docker run --network coursework_mynetwork -v ${PWD}:/zap/wrk/:rw -t zaproxy/zap-
 For the purpose of the project and it's grading, results from the first run can be found as a PDF in the project. Obviously in the real world,
 it probably would not be wise to publish report publicly.
 
+Also results of the trivy file scan can be found in the project. It was run 
+using the following command:
+```bash
+docker pull aquasec/trivy:0.18.3 
+docker run trivy fs .      
+```
+
 
 ## Security
+Project was done keeping security coding practices in mind as well as keeping the OWASP API Top 10 vulnerabilities as a checklist.
 
-### OWASP API Top 10
+### OWASP API Top 10 checklist
 
 Application doesn't have any functionality where *object level authorization* is needed. If necessary in the future, there could be authenticated users how were the only one's allowed to add products and editing or removing the products should have a verification that the request is made by the same user how owns the product. 
 
@@ -122,3 +137,8 @@ Before going into production, it is crucial to maintain up-to-date documentation
 If the API used in the project were external, it would be necessary to validate and sanitize responses in the GatewayConfig.
 
 # Future improvements
+Admin endpoints should be secured with authentication and authorization.
+
+# AI Usage
+The project was developed with the help of AI tools, including ChatGPT and GitHub Copilot. ChatGPT was used to give ideas
+on what kind of security features could be implemented in the project and Copilot autocomplete was used to speed up the coding process.

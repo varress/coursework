@@ -9,6 +9,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
+/**
+ * This class resolves the IP address of the client making the request.
+ * It implements the KeyResolver interface from Spring Cloud Gateway.
+ */
 @Component
 public class IPAddressResolver implements KeyResolver {
 

@@ -34,11 +34,7 @@ public class LoggingFilter implements GlobalFilter {
         ServerHttpRequest request = exchange.getRequest();
 
         String ipAddress = ipAddressResolver.resolve(exchange).blockOptional().orElse("unknown");
-        String uuid = mobileClientResolver.resolveClient(exchange)
-                .map(Device::getUuid)
-                .onErrorReturn("unknown")
-                .blockOptional()
-                .orElse("unknown");
+        String uuid = mobileClientResolver.resolve(exchange).blockOptional().orElse("unknown");
 
         String method = request.getMethod().name();
         String uri = request.getURI().toString();

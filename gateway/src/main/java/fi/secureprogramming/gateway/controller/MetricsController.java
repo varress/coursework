@@ -11,6 +11,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * The MetricsController is a Spring Boot REST controller responsible for exporting
+ * usage metrics from Redis to a monitoring system using Micrometer.
+ *
+ * <p>This controller performs the following tasks:
+ * <ul>
+ *   <li>Retrieves usage data from Redis.</li>
+ *   <li>Dynamically creates and updates Micrometer gauges for monitoring.</li>
+ *   <li>Schedules periodic metric exports.</li>
+ *   <li>Handles errors during metric processing.</li>
+ * </ul>
+ */
 @RestController
 public class MetricsController {
 
@@ -23,6 +35,13 @@ public class MetricsController {
         this.meterRegistry = meterRegistry;
     }
 
+    /**
+     * Exports usage metrics from Redis to Micrometer gauges every 60 seconds.
+     *
+     * <p>This method retrieves keys matching the pattern "usage:hour:*" from Redis,
+     * parses the usage data, and dynamically updates gauges for each unique combination
+     * of UUID and hour.
+     */
     @Scheduled(fixedRate = 60000)
     public void exportUsageMetrics() {
         redisTemplate.keys("usage:hour:*")

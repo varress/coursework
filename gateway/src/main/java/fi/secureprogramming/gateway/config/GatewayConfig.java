@@ -1,5 +1,6 @@
 package fi.secureprogramming.gateway.config;
 
+import fi.secureprogramming.gateway.filters.MobileClientVerificationFilter;
 import fi.secureprogramming.dto.ProductDTO;
 import fi.secureprogramming.gateway.services.IPAddressResolver;
 import fi.secureprogramming.gateway.services.MobileClientResolver;
@@ -15,11 +16,16 @@ public class GatewayConfig {
     private final RedisRateLimiter redisRateLimiter;
     private final IPAddressResolver ipAddressResolver;
     private final MobileClientResolver mobileClientResolver;
+    private final MobileClientVerificationFilter mobileClientVerificationFilter;
 
-    public GatewayConfig(RedisRateLimiter redisRateLimiter, IPAddressResolver ipAddressResolver, MobileClientResolver mobileClientResolver) {
+    public GatewayConfig(RedisRateLimiter redisRateLimiter,
+                         IPAddressResolver ipAddressResolver,
+                         MobileClientResolver mobileClientResolver,
+                         MobileClientVerificationFilter mobileClientVerificationFilter) {
         this.redisRateLimiter = redisRateLimiter;
         this.ipAddressResolver = ipAddressResolver;
         this.mobileClientResolver = mobileClientResolver;
+        this.mobileClientVerificationFilter = mobileClientVerificationFilter;
     }
 
     @Bean
@@ -38,6 +44,7 @@ public class GatewayConfig {
                         .path("/products")
                         .and().method("GET")
                         .filters(getProductsFilters -> getProductsFilters
+                                .filter(mobileClientVerificationFilter)
                                 .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(mobileClientResolver)))
@@ -45,7 +52,7 @@ public class GatewayConfig {
                 .route("register", registerDeviceRoute -> registerDeviceRoute
                         .path("/device/register")
                         .and().method("POST")
-                        .filters(getProductsFilters -> getProductsFilters
+                        .filters(registerFilters -> registerFilters
                                 .requestRateLimiter(rateLimiterConfig -> rateLimiterConfig
                                         .setRateLimiter(redisRateLimiter)
                                         .setKeyResolver(ipAddressResolver)))
