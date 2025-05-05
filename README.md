@@ -1,5 +1,5 @@
-# Instructions for the project
--General description: How the program is used and to what purpose and describtion of user interface especially form those parts that are not self-evident.
+### Instructions for the project
+-General description: How the program is used and to what purpose and description of user interface especially form those parts that are not self-evident.
 -Structure of the program
 -Secure programming solutions: How and in which parts of the code? You should also comment the code itself. You should use a checklist, for example OWASP TOP 10 or SANS 25. Describe how issues have been solved.
 -You should include at least manual security testing, but it is highly recommended to do more extensive testing. Report testing and also what you found and what you fixed based on testing. If you made the DevSecOps exercise it is a good idea to use the pipeline throughout the programming project.
@@ -8,7 +8,7 @@
 -Suggestions for improvement, what could be implemented.
 
 
-## Secure Programming Coursework
+# Secure Programming Coursework
 This is a project for the Secure Programming course at the University of Tampere. 
 The goal of this project was to create a secure API gateway that communicates 
 with a backend service. The scope was to focus on rate limiting, monitoring and finding a way 
@@ -19,6 +19,8 @@ security best practices and principles.
 
 Scope was created with the primary goal of exploring new advancements 
 in gateway security features.
+
+[![High level](https://drive.google.com/uc?id=1MpPrrzv1KVRygbOIFwB32HfT_q0wso6s "Project on a high level")](https://drive.google.com/file/d/1MpPrrzv1KVRygbOIFwB32HfT_q0wso6s/view?usp=sharing)
 
 ### Parts
 - API Gateway: The main entry point for clients to access the backend service. It handles identifying clients, black listing, white listing, rate limiting, and monitoring.
@@ -32,6 +34,40 @@ unusual usage times per client. Metrics are collected using Prometheus.
 - Unit Tests: A set of unit tests for the API Gateway and backend service. These tests cover various aspects of the code, including security and functionality. The tests are run using JUnit and Mockito.
 - Integration Tests: A set of integration tests for the API Gateway and backend service. These tests cover the interaction between the two services, ensuring that they work together as expected. The tests are run using Spring Boot Test and Mockito.
 - Security Testing: A set of security tests for the API Gateway. The tests are run using OWASP ZAP and CodeQL static application security testing.
+
+```mermaid
+sequenceDiagram
+    participant Mobile Client
+    participant API Gateway
+    participant Backend Service
+    participant Redis
+    participant Database
+    participant Prometheus
+
+    Mobile Client->>API Gateway: API request with UUID, timestamp, signature
+    API Gateway->>Database: Load key for UUID
+    API Gateway->>API Gateway: Validate HMAC-SHA256 signature
+    alt Signature invalid
+        API Gateway-->>Mobile Client: 401 - Unauthorized
+    else Signature valid
+        API Gateway->>Database: Check if UUID is registered and active
+        alt UUID is blacklisted or not registered
+            API Gateway-->>Mobile Client: 401 - Unauthenticated
+        else UUID is active
+            API Gateway->>Redis: Check rate limit for UUID
+            alt Rate limit exceeded
+                API Gateway->>Database: Add UUID to blacklist
+                API Gateway-->>Mobile Client: 429 - Too many requests
+            else Rate limit OK
+                API Gateway->>Redis: Track usage time
+                API Gateway->>Prometheus: Record metrics
+                API Gateway->>Backend Service: Forward API request
+                Backend Service-->>API Gateway: API response
+                API Gateway-->>Mobile Client: API response
+            end
+        end
+    end
+```
 
 ## API Gateway
 Gateway is the main entry point for clients to access the backend service. The API Gateway is implemented using Spring Boot and Java.
@@ -47,13 +83,13 @@ The API Gateway also includes monitoring and logging features, which are impleme
 and metrics are collected and sent to Prometheus for monitoring. There is also a UsageTimeTrackingFilter to track the time for each request and response so
 that requests coming on unusual times can be detected. There is also a Grafana dashboard included in the project for visualizing the security metrics of the API Gateway.
 
-# How to run the project
+## How to run the project
 
-## Clone the repository
+### Clone the repository
 
-## Install Docker and Docker Compose
+### Install Docker and Docker Compose
 
-## Add values to .env file, for example:
+### Add values to .env file, for example:
 ```
 DB_HOST=db
 DB_PORT=5432
@@ -74,12 +110,12 @@ It can be generated using the following command:
 openssl rand -base64 32
 ```
 
-## Build the project
+### Build the project
 ```bash
 ./gradlew build
 ```
 
-## Run the project using Docker Compose
+### Run the project using Docker Compose
 ```bash
 docker-compose up --build -d
 ```
@@ -91,7 +127,7 @@ Grafana can be accessed at http://localhost:3000 and the default username and pa
 One can and should also create alerts in grafana for unusual usage times, too many unauthenticated responses and too many requests responses.
 
 
-# Quality control
+## Quality control
 There is a CI pipeline using github actions that builds the program, runs unit tests and SAST. 
 
 DAST was run locally and can be run using the following command:
@@ -136,10 +172,10 @@ Before going into production, it is crucial to maintain up-to-date documentation
 
 If the API used in the project were external, it would be necessary to validate and sanitize responses in the GatewayConfig.
 
-# Future improvements
+## Future improvements
 Admin endpoints should be secured with authentication and authorization.
 It would be wise to add dependency check for the libraries used in the project, to make sure that there are no known vulnerabilities in the libraries used.
 
-# AI Usage
+## AI Usage
 The project was developed with the help of AI tools, including ChatGPT and GitHub Copilot. ChatGPT was used to give ideas
 on what kind of security features could be implemented in the project and Copilot autocomplete was used to speed up the coding process.
