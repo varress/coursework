@@ -48,7 +48,7 @@ sequenceDiagram
     API Gateway->>Database: Load key for UUID
     API Gateway->>API Gateway: Validate HMAC-SHA256 signature
     alt Signature invalid
-        API Gateway-->>Mobile Client: 401 - Unauthorized
+        API Gateway-->>Mobile Client: 401 - Unauthenticated
     else Signature valid
         API Gateway->>Database: Check if UUID is registered and active
         alt UUID is blacklisted or not registered
@@ -59,7 +59,6 @@ sequenceDiagram
                 API Gateway->>Database: Add UUID to blacklist
                 API Gateway-->>Mobile Client: 429 - Too many requests
             else Rate limit OK
-                API Gateway->>Redis: Track usage time
                 API Gateway->>Prometheus: Record metrics
                 API Gateway->>Backend Service: Forward API request
                 Backend Service-->>API Gateway: API response
@@ -128,7 +127,8 @@ One can and should also create alerts in grafana for unusual usage times, too ma
 
 
 ## Quality control
-There is a CI pipeline using github actions that builds the program, runs unit tests and SAST. 
+There is a CI pipeline using Github actions, that builds the program, runs unit tests and SAST. 
+Unit tests are focused on the security features of the API Gateway.
 
 DAST was run locally and can be run using the following command:
 ```bash
@@ -137,7 +137,7 @@ docker run --network coursework_mynetwork -v ${PWD}:/zap/wrk/:rw -t zaproxy/zap-
 >>   -f openapi -t /zap/wrk/openapi.yaml -r zap-report.html
 ```
 For the purpose of the project and it's grading, results from the first run can be found as a PDF in the project. Obviously in the real world,
-it probably would not be wise to publish report publicly.
+it probably would not be wise to publish report publicly. Only 2 low risk issues were found.
 
 Also results of the trivy file scan can be found in the project. It was run 
 using the following command:
@@ -174,7 +174,9 @@ If the API used in the project were external, it would be necessary to validate 
 
 ## Future improvements
 Admin endpoints should be secured with authentication and authorization.
+Rate limiting for admin endpoints uses IP address, which is not very trustful. It would be better to use a more secure method, such as JWT tokens.
 It would be wise to add dependency check for the libraries used in the project, to make sure that there are no known vulnerabilities in the libraries used.
+Key rotation could be forced for the clients, so that they would have to change their keys periodically.
 
 ## AI Usage
 The project was developed with the help of AI tools, including ChatGPT and GitHub Copilot. ChatGPT was used to give ideas
