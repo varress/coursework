@@ -1,0 +1,36 @@
+pick ab2f733 Publish sast and dast reports
+s 55c3a91 test
+s c986fc2 version
+s c6642a9 test
+s 4b4728c Readme
+s 99bead3 test
+s ba00f04 Update ci-cd.yml
+s dd56de2 Test dast using postman collection
+s 3410a11 test github registry
+s 56a0cf7 test
+s 201d935 test with open api
+
+# Rebase 0351bab..201d935 onto dd56de2 (11 commands)
+#
+# Commands:
+# p, pick <commit> = use commit
+# r, reword <commit> = use commit, but edit the commit message
+# e, edit <commit> = use commit, but stop for amending
+# s, squash <commit> = use commit, but meld into previous commit
+# f, fixup <commit> = like "squash", but discard this commit's log message
+# x, exec <command> = run command (the rest of the line) using shell
+# b, break = stop here (continue rebase later with 'git rebase --continue')
+# d, drop <commit> = remove commit
+# l, label <label> = label current HEAD with a name
+# t, reset <label> = reset HEAD to a label
+# m, merge [-C <commit> | -c <commit>] <label> [# <oneline>]
+# .       create a merge commit using the original merge commit's
+# .       message (or the oneline, if no original merge commit was
+# .       specified). Use -c <commit> to reword the commit message.
+#
+# These lines can be re-ordered; they are executed from top to bottom.
+#
+# If you remove a line here THAT COMMIT WILL BE LOST.
+#
+# However, if you remove everything, the rebase will be aborted.
+#
